@@ -1,0 +1,99 @@
+<div class="container">
+  <h2>Configuración de Notificaciones</h2>
+
+  <div *ngIf="cargando" class="loading">Cargando configuración...</div>
+
+  <div *ngIf="mensaje" class="mensaje">{{ mensaje }}</div>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div *ngIf="!cargando">
+    <!-- Cambiamos (ngSubmit)="guardarConfiguracion()" a (ngSubmit)="onSubmit()" -->
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="emailRemitente">Email Remitente *</label>
+        <input
+          type="email"
+          id="emailRemitente"
+          name="emailRemitente"
+          [(ngModel)]="configuracion.emailRemitente"
+          class="form-control">
+        <div *ngIf="errors['emailRemitente']" class="error-msg">
+          {{ errors['emailRemitente'] }}
+        </div>
+        <small class="form-text">Este email aparecerá como remitente en las notificaciones</small>
+      </div>
+
+      <div class="form-group">
+        <label for="diasAnticipacion">Días de Anticipación *</label>
+        <input
+          type="number"
+          id="diasAnticipacion"
+          name="diasAnticipacion"
+          [(ngModel)]="configuracion.diasAnticipacion"
+          class="form-control"
+          min="1">
+        <div *ngIf="errors['diasAnticipacion']" class="error-msg">
+          {{ errors['diasAnticipacion'] }}
+        </div>
+        <small class="form-text">Días antes del vencimiento para enviar la notificación principal</small>
+      </div>
+
+      <div class="form-group checkbox">
+        <label>
+          <input
+            type="checkbox"
+            name="recordatoriosAdicionales"
+            [(ngModel)]="configuracion.recordatoriosAdicionales">
+          Enviar recordatorios adicionales
+        </label>
+        <small class="form-text">Enviar recordatorios adicionales hasta la fecha de vencimiento</small>
+      </div>
+
+      <div class="form-group" *ngIf="configuracion.recordatoriosAdicionales">
+        <label for="frecuenciaRecordatorio">Frecuencia de Recordatorios</label>
+        <select
+          id="frecuenciaRecordatorio"
+          name="frecuenciaRecordatorio"
+          [(ngModel)]="configuracion.frecuenciaRecordatorio"
+          class="form-control">
+          <option value="diario">Diario</option>
+          <option value="semanal">Semanal</option>
+          <option value="quincenal">Quincenal</option>
+        </select>
+        <small class="form-text">Con qué frecuencia enviar los recordatorios adicionales</small>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="guardando" class="btn-primary">
+          {{ guardando ? 'Guardando...' : 'Guardar Configuración' }}
+        </button>
+      </div>
+    </form>
+
+    <div class="test-email-section">
+      <h3>Enviar Correo de Prueba</h3>
+      <form (ngSubmit)="enviarCorreoPrueba()">
+        <div class="form-group">
+          <label for="testEmail">Email para Prueba *</label>
+          <input
+            type="email"
+            id="testEmail"
+            name="testEmail"
+            [(ngModel)]="testEmailAddress"
+            class="form-control">
+          <div *ngIf="errors['testEmail']" class="error-msg">
+            {{ errors['testEmail'] }}
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="enviandoPrueba" class="btn-secondary">
+            {{ enviandoPrueba ? 'Enviando...' : 'Enviar Correo de Prueba' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
