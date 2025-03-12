@@ -1,0 +1,71 @@
+.tabs {
+    width: 100%;
+    margin: 20px auto;
+  }
+  
+  .tabs-labels {
+    display: flex;
+    justify-content: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .tabs-labels label {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .tabs-labels label:hover {
+    background-color: #e0e0e0;
+  }
+
+  .boton{
+    width: 36px;
+    height: 41px;
+
+  }
+
+  .tabs-content {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  .badge-custom {
+    background-color: #d1fae5; /* Verde muy claro */
+    color: #dbc70e; /* Verde oscuro */
+    padding: 5px 10px;
+    border-radius: 9999px; /* Para hacerlo totalmente redondeado */
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+  
+  /* Mostrar contenido según tab activo */
+  #tab-all:checked ~ #content-all,
+  #tab-active:checked ~ #content-active,
+  #tab-expiring:checked ~ #content-expiring,
+  #tab-expired:checked ~ #content-expired {
+    display: block;
+  }
+  
+  /* Estilo de tab activo */
+  #tab-all:checked ~ .tabs-labels label[for="tab-all"],
+  #tab-active:checked ~ .tabs-labels label[for="tab-active"],
+  #tab-expiring:checked ~ .tabs-labels label[for="tab-expiring"],
+  #tab-expired:checked ~ .tabs-labels label[for="tab-expired"] {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+  }
+  
+  /* Ocultar radios */
+  .tabs input[type="radio"] {
+    display: none;
+  }
+  

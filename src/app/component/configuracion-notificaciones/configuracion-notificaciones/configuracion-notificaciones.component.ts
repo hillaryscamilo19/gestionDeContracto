@@ -74,7 +74,6 @@ export class ConfiguracionNotificacionesComponent implements OnInit {
         this.errors["emailRemitente"] = "Ingrese un email válido"
         isValid = false
       }
-
       // Validar días de anticipación
       if (!this.configuracion.diasAnticipacion) {
         this.errors["diasAnticipacion"] = "Los días de anticipación son requeridos"
@@ -83,7 +82,6 @@ export class ConfiguracionNotificacionesComponent implements OnInit {
         this.errors["diasAnticipacion"] = "Ingrese un número válido mayor a 0"
         isValid = false
       }
-
       return isValid
     }
 

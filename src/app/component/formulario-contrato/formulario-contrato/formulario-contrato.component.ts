@@ -3,6 +3,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ContractoService } from '../../../services/contracto/contracto.service';
 import { ContractModule } from '../../../models/contract/contract.module';
+import { faCoffee, faFileCirclePlus } from '@fortawesome/free-solid-svg-icons';
+
+
 
 @Component({
   selector: 'app-formulario-contrato',
@@ -10,6 +13,14 @@ import { ContractModule } from '../../../models/contract/contract.module';
   styleUrls: ['./formulario-contrato.component.css']
 })
 export class FormularioContratoComponent implements OnInit {
+  faCoffee = faFileCirclePlus;
+  contracts = []; // todos los contratos
+  activeContracts = []; // activos
+  expiringContracts = []; // por vencer
+  expiredContracts = []; // vencidos
+  mostrarFormulario = false;
+  contratoSeleccionado: any = null;
+  tabSeleccionado = 0;
   contratoForm!: FormGroup;
   modoEdicion = false;
   contratoId: string | any;
@@ -25,13 +36,75 @@ export class FormularioContratoComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.contratoForm = this.fb.group({
+      clientName: ['', Validators.required],
+      clientEmail: ['', [Validators.required, Validators.email]],
+      description: ['', Validators.required],
+      startDate: ['', Validators.required],
+      expirationDate: ['', Validators.required],
+    });
     this.inicializarFormulario();
-
     this.contratoId = this.route.snapshot.paramMap.get('id');
     if (this.contratoId) {
       this.modoEdicion = true;
       this.cargarContrato();
     }
+  }
+
+  abrirFormulario(contrato: any = null) {
+    this.mostrarFormulario = true;
+    this.contratoSeleccionado = null; // nuevo contrato
+    if (contrato) {
+      // Si es edición, rellenar el formulario
+      this.contratoForm.patchValue({
+        clientName: contrato.clientName,
+        clientEmail: contrato.clientEmail,
+        description: contrato.description,
+        startDate: contrato.startDate,
+        expirationDate: contrato.expirationDate,
+      });
+    } else {
+      // Si es nuevo, limpiar el formulario
+      this.contratoForm.reset();
+    }
+  }
+
+  editarContrato(contrato: any) {
+    this.mostrarFormulario = true;
+    this.contratoSeleccionado = contrato;
+  }
+
+  cerrarFormulario() {
+    this.mostrarFormulario = false;
+    this.contratoSeleccionado = null;
+  }
+
+  guardarContrato() {
+    if (this.contratoForm.valid) {
+      const nuevoContrato = this.contratoForm.value;
+      if (this.contratoSeleccionado) {
+        // Lógica para actualizar contrato
+        console.log('Contrato actualizado:', nuevoContrato);
+      } else {
+        // Lógica para crear contrato
+        console.log('Nuevo contrato:', nuevoContrato);
+      }
+      // Cerrar modal manualmente (opcional si quieres forzarlo)
+      const modalElement = document.getElementById('contratoModal');
+      if (modalElement) {
+        const modal = (window as any).bootstrap.Modal.getInstance(modalElement);
+        modal?.hide();
+
+      }
+      // Reiniciar estado
+      this.contratoSeleccionado = null;
+    } else {
+      console.log('Formulario inválido');
+    }
+  }
+
+  eliminarContrato(contrato: any) {
+    // lógica para eliminar contrato
   }
 
   inicializarFormulario(): void {
