@@ -8,28 +8,33 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class ContractoService {
+  private apiUrl = `${environment.apiUrl}/contratos`
 
-  private apiUrl = `${environment.apiUrl}/contratos`;
+  constructor(private http: HttpClient) {}
 
-  constructor(private http: HttpClient) { }
-
-  getContratos(): Observable<ContractModule[]> {
-    return this.http.get<ContractModule[]>(this.apiUrl);
+  getContratos(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl)
   }
 
-  getContrato(id: string): Observable<ContractModule> {
-    return this.http.get<ContractModule>(`${this.apiUrl}/${id}`);
+  getContrato(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`)
   }
 
-  crearContrato(contrato: ContractModule): Observable<ContractModule> {
-    return this.http.post<ContractModule>(this.apiUrl, contrato);
+  crearContrato(formData: FormData): Observable<any> {
+    return this.http.post<any>(this.apiUrl, formData)
   }
 
-  actualizarContrato(id: string, contrato: ContractModule): Observable<ContractModule> {
-    return this.http.put<ContractModule>(`${this.apiUrl}/${id}`, contrato);
+  actualizarContrato(id: string, formData: FormData): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, formData)
   }
 
   eliminarContrato(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+    return this.http.delete<any>(`${this.apiUrl}/${id}`)
+  }
+
+  descargarPdf(id: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/pdf`, {
+      responseType: "blob",
+    })
   }
 }

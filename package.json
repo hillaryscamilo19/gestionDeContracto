@@ -28,6 +28,7 @@
     "conventional-changelog-angular": "^8.0.0",
     "font-awesome-icons": "^1.6.0",
     "jquery": "^3.7.1",
+    "ngx-toastr": "^19.0.0",
     "postcss": "^8.5.3",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.0.13",

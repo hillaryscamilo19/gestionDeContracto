@@ -2,14 +2,14 @@
     width: 100%;
     margin: 20px auto;
   }
-  
+
   .tabs-labels {
     display: flex;
     justify-content: flex-start;
     gap: 16px;
     margin-bottom: 16px;
   }
-  
+
   .tabs-labels label {
     padding: 10px 20px;
     background-color: #f0f0f0;
@@ -17,7 +17,7 @@
     cursor: pointer;
     transition: background-color 0.3s;
   }
-  
+
   .tabs-labels label:hover {
     background-color: #e0e0e0;
   }
@@ -45,7 +45,49 @@
     font-weight: bold;
     font-size: 0.9rem;
   }
-  
+
+  /* Estilos para la subida de archivos */
+.file-name {
+  font-size: 0.9em;
+  color: #666;
+  margin-left: 10px;
+}
+
+/* Estilos para los badges de estado */
+.badge {
+  padding: 0.5em 0.75em;
+  border-radius: 4px;
+}
+
+/* Estilos para la tabla */
+.table {
+  vertical-align: middle;
+}
+
+/* Estilos para el botón de archivo */
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-file input[type="file"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  outline: none;
+  background: white;
+  cursor: inherit;
+  display: block;
+}
+
+
+
   /* Mostrar contenido según tab activo */
   #tab-all:checked ~ #content-all,
   #tab-active:checked ~ #content-active,
@@ -53,7 +95,7 @@
   #tab-expired:checked ~ #content-expired {
     display: block;
   }
-  
+
   /* Estilo de tab activo */
   #tab-all:checked ~ .tabs-labels label[for="tab-all"],
   #tab-active:checked ~ .tabs-labels label[for="tab-active"],
@@ -63,9 +105,8 @@
     color: white;
     font-weight: bold;
   }
-  
+
   /* Ocultar radios */
   .tabs input[type="radio"] {
     display: none;
   }
-  

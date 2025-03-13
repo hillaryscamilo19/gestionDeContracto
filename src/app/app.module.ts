@@ -11,6 +11,7 @@ import { FormularioContratoComponent } from "./component/formulario-contrato/for
 import { ListaContratosComponent } from "./component/lista-contratos/lista-contratos/lista-contratos.component"
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 import { ReactiveFormsModule } from '@angular/forms';
+import { ToastrModule } from 'ngx-toastr';
 
 
 @NgModule({
@@ -22,7 +23,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     FormularioContratoComponent,
     ConfiguracionNotificacionesComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule, FontAwesomeModule,ReactiveFormsModule],
+  imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule, FontAwesomeModule,ReactiveFormsModule, ToastrModule.forRoot()],
   providers: [],
   bootstrap: [AppComponent],
 })
