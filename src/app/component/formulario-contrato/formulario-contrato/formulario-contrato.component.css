@@ -12,14 +12,14 @@
 
   .tabs-labels label {
     padding: 10px 20px;
-    background-color: #f0f0f0;
+    background-color: #ff1212;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s;
   }
 
   .tabs-labels label:hover {
-    background-color: #e0e0e0;
+    background-color: #ff2f2f;
   }
 
   .boton{
