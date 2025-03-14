@@ -102,7 +102,7 @@
   #tab-expiring:checked ~ .tabs-labels label[for="tab-expiring"],
   #tab-expired:checked ~ .tabs-labels label[for="tab-expired"] {
     background-color: #007bff;
-    color: white;
+    color: rgb(0, 0, 0);
     font-weight: bold;
   }
 

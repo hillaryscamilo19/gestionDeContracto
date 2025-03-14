@@ -14,9 +14,6 @@ export class ContractoService {
   constructor(private http: HttpClient) {}
 
   getContratos(): Observable<any[]> {
-    let h = this.http.get<any[]>(this.apiUrl)
-    console.log(h);
-    
     return this.http.get<any[]>(this.apiUrl)
   }
 
@@ -34,6 +31,10 @@ export class ContractoService {
 
   actualizarContrato(id: string, formData: FormData): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/${id}`, formData)
+  }
+
+  crearContratoJSON(contratoData: any): Observable<any> {
+    return this.http.post(this.apiUrl, contratoData);
   }
 
   eliminarContrato(id: string): Observable<any> {

@@ -10,10 +10,12 @@ import { CommonModule } from '@angular/common';
   ]
 })
 export class ContractModule {
+  _id!: string; 
   clienteEmail: any;
   clienteNombre: any;
   numeroContrato: any;
   descripcion: any;
   fechaInicio!: string | number | Date;
   fechaVencimiento!: string | number | Date;
+  pdfUrl!: string;
 }

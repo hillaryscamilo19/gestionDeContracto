@@ -15,7 +15,6 @@
       <tr>
         <th>Nombre</th>
         <th>Email Empresa</th>
-        <th>Descripción</th>
         <th>numero de Contracto</th>
         <th>Fecha Inicio</th>
         <th>Fecha De vencimiento</th>
@@ -25,15 +24,14 @@
     </thead>
     <tbody>
       <tr *ngFor="let contrato of filtrarPorEstado('Activo')">
-        <td>{{ contrato.clientName }}</td>
-        <td>{{ contrato.clientEmail }}</td>
-        <td>{{ contrato.description }}</td>
+        <td>{{ contrato.clienteNombre }}</td>
+        <td>{{ contrato.clienteEmail }}</td>
         <td>{{ contrato.numeroContrato }}</td>
-        <td>{{ contrato.startDate | date:'MMM d, yyyy' }}</td>
-        <td>{{ contrato.expirationDate | date:'MMM d, yyyy' }}</td>
+        <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
+        <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
         <td>
           <button *ngIf="tienePdf(contrato)" class="btn btn-sm btn-outline-primary"
-            (click)="descargarPdf(contrato._id, contrato.clientName)">
+            (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
             <i class="fas fa-file-pdf me-1"></i> Descargar
           </button>
           <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin PDF</span>
@@ -70,7 +68,8 @@
     <thead>
       <tr>
         <th>Nombre</th>
-        <th>Descripción</th>
+        <th>Email Empresa</th>
+        <th>numero de Contracto</th>
         <th>Fecha Inicio</th>
         <th>Fecha De vencimiento</th>
         <th>PDF</th>
@@ -78,14 +77,15 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let contrato of filtrarPorEstado('Por vencer')">
-        <td>{{ contrato.clientName }}</td>
-        <td>{{ contrato.description }}</td>
-        <td>{{ contrato.startDate | date:'MMM d, yyyy' }}</td>
-        <td>{{ contrato.expirationDate | date:'MMM d, yyyy' }}</td>
+      <tr *ngFor="let contrato of filtrarPorEstado('Activo')">
+        <td>{{ contrato.clienteNombre }}</td>
+        <td>{{ contrato.clienteEmail }}</td>
+        <td>{{ contrato.numeroContrato }}</td>
+        <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
+        <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
         <td>
           <button *ngIf="tienePdf(contrato)" class="btn btn-sm btn-outline-primary"
-            (click)="descargarPdf(contrato._id, contrato.clientName)">
+            (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
             <i class="fas fa-file-pdf me-1"></i> Descargar
           </button>
           <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin PDF</span>
@@ -96,7 +96,7 @@
               <i class="fas fa-eye"></i>
             </button>
             <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
-              (click)="editarContrato(contrato)">
+              (click)="editarContrato(contrato._id)">
               <i class="fas fa-edit"></i>
             </button>
             <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
@@ -123,7 +123,8 @@
     <thead>
       <tr>
         <th>Nombre</th>
-        <th>Descripción</th>
+        <th>Email Empresa</th>
+        <th>numero de Contracto</th>
         <th>Fecha Inicio</th>
         <th>Fecha De vencimiento</th>
         <th>PDF</th>
@@ -131,14 +132,15 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let contrato of filtrarPorEstado('Vencido')">
-        <td>{{ contrato.clientName }}</td>
-        <td>{{ contrato.description }}</td>
-        <td>{{ contrato.startDate | date:'MMM d, yyyy' }}</td>
-        <td>{{ contrato.expirationDate | date:'MMM d, yyyy' }}</td>
+      <tr *ngFor="let contrato of filtrarPorEstado('Activo')">
+        <td>{{ contrato.clienteNombre }}</td>
+        <td>{{ contrato.clienteEmail }}</td>
+        <td>{{ contrato.numeroContrato }}</td>
+        <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
+        <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
         <td>
           <button *ngIf="tienePdf(contrato)" class="btn btn-sm btn-outline-primary"
-            (click)="descargarPdf(contrato._id, contrato.clientName)">
+            (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
             <i class="fas fa-file-pdf me-1"></i> Descargar
           </button>
           <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin PDF</span>
@@ -183,7 +185,11 @@
             <input type="text" id="clientName" name="clientName" class="form-control" [(ngModel)]="nuevoContrato.clientName" required>
           </div>
           <div class="mb-3">
-            <label for="clientEmail" class="form-label">Email Cliente</label>
+            <label for="clienteEmail" class="form-label">Email Cliente</label>
+            <input type="email" id="clienteEmail" name="clienteEmail" class="form-control" [(ngModel)]="nuevoContrato.clienteEmail" required>
+          </div>
+          <div class="mb-3">
+            <label for="clienteEmail" class="form-label">Email Cliente</label>
             <input type="email" id="clientEmail" name="clientEmail" class="form-control" [(ngModel)]="nuevoContrato.clientEmail" required>
           </div>
           <div class="mb-3">
@@ -202,10 +208,7 @@
             <label for="numeroContrato" class="form-label">Número Contrato</label>
             <input type="text" id="numeroContrato" name="numeroContrato" class="form-control" [(ngModel)]="nuevoContrato.numeroContrato" required>
           </div>
-          <div class="mb-3">
-            <label for="clienteEmail" class="form-label">Email Cliente</label>
-            <input type="email" id="clienteEmail" name="clienteEmail" class="form-control" [(ngModel)]="nuevoContrato.clienteEmail" required>
-          </div>
+
           <div class="mb-3">
             <label for="clienteNombre" class="form-label">Nombre Cliente (Responsable)</label>
             <input type="text" id="clienteNombre" name="clienteNombre" class="form-control" [(ngModel)]="nuevoContrato.clienteNombre" required>

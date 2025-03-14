@@ -1,15 +1,19 @@
 <div class="cards-container">
-    <div class="card">
-      <span class="card-title">Total de Contratos</span>
-      <span class="card-number">1</span>
-    </div>
-    <div class="card">
-      <span class="card-title">Por Vencer</span>
-      <span class="card-number warning">1</span>
-    </div>
-    <div class="card">
-      <span class="card-title">Vencidos</span>
-      <span class="card-number danger">1</span>
-    </div>
+  <div class="card">
+    <span class="card-title">Total de Contratos</span>
+    <span class="card-number">{{ contratos.length }}</span>
   </div>
-  <app-formulario-contrato [contratos]="contratos" [cargando]="cargando"></app-formulario-contrato>
+  <div class="card">
+    <span class="card-title">Activos</span>
+    <span class="card-number">{{ filtrarPorEstado('Activo').length }}</span>
+  </div>
+  <div class="card">
+    <span class="card-title">Por Vencer</span>
+    <span class="card-number warning">{{ filtrarPorEstado('Por vencer').length }}</span>
+  </div>
+  <div class="card">
+    <span class="card-title">Vencidos</span>
+    <span class="card-number danger">{{ filtrarPorEstado('Vencido').length }}</span>
+  </div>
+</div>
+<app-formulario-contrato [contratos]="contratos" [cargando]="cargando"></app-formulario-contrato>
