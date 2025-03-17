@@ -37,7 +37,8 @@ export class FormularioContratoComponent implements OnInit {
   ngOnInit(): void {
     this.cargarContratos();
     setTimeout(() => {
-      console.log('Activos:', this.filtrarPorEstado('Activo'));
+      console.log('ALL:', this.filtrarPorEstado('ALL'));
+      console.log('Activo:', this.filtrarPorEstado('Activo'));
       console.log('Por vencer:', this.filtrarPorEstado('Por vencer'));
       console.log('Vencidos:', this.filtrarPorEstado('Vencido'));
     }, 1000);
@@ -98,16 +99,19 @@ export class FormularioContratoComponent implements OnInit {
 
   getEstadoTexto(contrato: any): string {
     const hoy = new Date();
-    const fechaVencimiento = new Date(contrato.expirationDate);
+    const fechaVencimiento = new Date(contrato.expirationDate || contrato.fechaVencimiento);
     const diasRestantes = Math.ceil((fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diasRestantes > 0) return 'Vencido';
+  
+    // Lógica corregida
+    if (diasRestantes <= 0) return 'Vencido';
     if (diasRestantes <= 30) return 'Por vencer';
     return 'Activo';
   }
 
   getEstadoClase(contrato: any): string {
     switch (contrato.estado) {
+      case 'all':
+        return 'table-info';
       case 'Vencido':
         return 'bg-danger';
       case 'Por vencer':
@@ -116,6 +120,20 @@ export class FormularioContratoComponent implements OnInit {
         return 'bg-success';
       default:
         return 'bg-secondary';
+    }
+  }
+  getFilaClase(contrato: any): string {
+    switch (contrato.estado) {
+      case 'all': //azul
+        return 'table-info';
+      case 'Vencido':
+        return 'table-danger'; // Rojo
+      case 'Por vencer':
+        return 'table-warning'; // Amarillo
+      case 'Activo':
+        return 'table-success'; // Verde
+      default:
+        return '';
     }
   }
 

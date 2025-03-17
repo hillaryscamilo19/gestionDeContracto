@@ -1,235 +1,213 @@
-<!-- Tab Content -->
-<div class="tab-content mt-3" id="myTabContent">
-
-  <!-- Todos los Contratos -->
-  <div class="tab-pane fade show active" id="all" role="tabpanel">
-  </div>
-
-  <!-- Activos -->
-  <div id="active" role="tabpanel">
-  </div>
-
-
-  <table class="table table-striped table-hover" *ngIf="!cargando && filtrarPorEstado('Activo').length > 0">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Email Empresa</th>
-        <th>numero de Contracto</th>
-        <th>Fecha Inicio</th>
-        <th>Fecha De vencimiento</th>
-        <th>PDF</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let contrato of filtrarPorEstado('Activo')">
-        <td>{{ contrato.clienteNombre }}</td>
-        <td>{{ contrato.clienteEmail }}</td>
-        <td>{{ contrato.numeroContrato }}</td>
-        <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
-        <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
-        <td>
-          <button *ngIf="tienePdf(contrato)" class="btn btn-sm btn-outline-primary"
-            (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
-            <i class="fas fa-file-pdf me-1"></i> Descargar
-          </button>
-          <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin PDF</span>
-        </td>
-        <td>
-          <div class="btn-group">
-            <button class="btn btn-sm btn-outline-info" (click)="verContrato(contrato)">
-              <i class="fas fa-eye"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
-              (click)="editarContrato(contrato)">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<!-- Por Vencer -->
-<div id="expiring" role="tabpanel">
-  <div *ngIf="cargando" class="text-center my-4">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando...</span>
+<!-- Nav Tabs -->
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="activo-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab">Activos</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="expiring-tab" data-bs-toggle="tab" data-bs-target="#expiring" type="button" role="tab">Por Vencer</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired" type="button" role="tab">Vencidos</button>
+    </li>
+  </ul>
+  
+  <!-- Tab Content -->
+  <div class="tab-content mt-3" id="myTabContent">
+    <!-- Activos -->
+    <div class="tab-pane fade" id="active" role="tabpanel">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email Empresa</th>
+            <th>numero de Contracto</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha De vencimiento</th>
+            <th>PDF</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contrato of filtrarPorEstado('Activo')" [ngClass]="getFilaClase(contrato)">
+            <td>{{ contrato.clienteNombre }}</td>
+            <td>{{ contrato.clienteEmail }}</td>
+            <td>{{ contrato.numeroContrato }}</td>
+            <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
+            <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
+            <td>
+              <button *ngIf="tienePdf(contrato)" class="btn btn-sm btn-outline-primary"
+                (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
+                <i class="fas fa-file-pdf me-1"></i> Descargar
+              </button>
+              <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin PDF</span>
+            </td>
+            <td>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-outline-info" (click)="verContrato(contrato)">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
+                  (click)="editarContrato(contrato)">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </div>
-
-
-  <table class="table table-striped table-hover" *ngIf="!cargando && filtrarPorEstado('Por vencer').length > 0">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Email Empresa</th>
-        <th>numero de Contracto</th>
-        <th>Fecha Inicio</th>
-        <th>Fecha De vencimiento</th>
-        <th>PDF</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let contrato of filtrarPorEstado('Activo')">
-        <td>{{ contrato.clienteNombre }}</td>
-        <td>{{ contrato.clienteEmail }}</td>
-        <td>{{ contrato.numeroContrato }}</td>
-        <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
-        <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
-        <td>
-          <button *ngIf="tienePdf(contrato)" class="btn btn-sm btn-outline-primary"
-            (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
-            <i class="fas fa-file-pdf me-1"></i> Descargar
-          </button>
-          <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin PDF</span>
-        </td>
-        <td>
-          <div class="btn-group">
-            <button class="btn btn-sm btn-outline-info" (click)="verContrato(contrato)">
-              <i class="fas fa-eye"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
-              (click)="editarContrato(contrato._id)">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<!-- Vencidos -->
-<div id="expired" role="tabpanel">
-  <div *ngIf="cargando" class="text-center my-4">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando...</span>
+  
+    <!-- Por Vencer -->
+    <div class="tab-pane fade" id="expiring" role="tabpanel">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email Empresa</th>
+            <th>numero de Contracto</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha De vencimiento</th>
+            <th>PDF</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contrato of filtrarPorEstado('Por vencer')" [ngClass]="getFilaClase(contrato)">
+            <td>{{ contrato.clienteNombre }}</td>
+            <td>{{ contrato.clienteEmail }}</td>
+            <td>{{ contrato.numeroContrato }}</td>
+            <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
+            <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
+            <td>
+              <button *ngIf="tienePdf(contrato)" class="btn btn-sm btn-outline-primary"
+                (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
+                <i class="fas fa-file-pdf me-1"></i> Descargar
+              </button>
+              <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin PDF</span>
+            </td>
+            <td>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-outline-info" (click)="verContrato(contrato)">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
+                  (click)="editarContrato(contrato)">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </div>
+  
+    <!-- Vencidos -->
+    <div class="tab-pane fade" id="expired" role="tabpanel">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email Empresa</th>
+            <th>numero de Contracto</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha De vencimiento</th>
+            <th>PDF</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contrato of filtrarPorEstado('Vencido')" [ngClass]="getFilaClase(contrato)">
+            <td>{{ contrato.clienteNombre }}</td>
+            <td>{{ contrato.clienteEmail }}</td>
+            <td>{{ contrato.numeroContrato }}</td>
+            <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
+            <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
+            <td>
+              <button *ngIf="tienePdf(contrato)" class="btn btn-sm btn-outline-primary"
+                (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
+                <i class="fas fa-file-pdf me-1"></i> Descargar
+              </button>
+              <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin PDF</span>
+            </td>
+            <td>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-outline-info" (click)="verContrato(contrato)">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
+                  (click)="editarContrato(contrato)">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
 
-
-  <table class="table table-striped table-hover" *ngIf="!cargando && filtrarPorEstado('Vencido').length > 0">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Email Empresa</th>
-        <th>numero de Contracto</th>
-        <th>Fecha Inicio</th>
-        <th>Fecha De vencimiento</th>
-        <th>PDF</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let contrato of filtrarPorEstado('Activo')">
-        <td>{{ contrato.clienteNombre }}</td>
-        <td>{{ contrato.clienteEmail }}</td>
-        <td>{{ contrato.numeroContrato }}</td>
-        <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
-        <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
-        <td>
-          <button *ngIf="tienePdf(contrato)" class="btn btn-sm btn-outline-primary"
-            (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
-            <i class="fas fa-file-pdf me-1"></i> Descargar
-          </button>
-          <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin PDF</span>
-        </td>
-        <td>
-          <div class="btn-group">
-            <button class="btn btn-sm btn-outline-info" (click)="verContrato(contrato)">
-              <i class="fas fa-eye"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
-              (click)="editarContrato(contrato)">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="d-flex justify-content-end mb-3">
-<!-- Botón para abrir el modal -->
-<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoContratoModal">
-  <i class="fas fa-plus"></i> Nuevo Contrato
-</button>
+     <!-- Modal -->
+    <div>
+<!-- Modal -->
+ <!-- Botón para abrir el modal -->
 
 
-   <!-- Modal para crear contrato -->
-<div class="modal fade" id="nuevoContratoModal" tabindex="-1" aria-labelledby="nuevoContratoModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+<!-- Modal -->
+<div class="modal fade" id="contratoModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="contratoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="nuevoContratoModalLabel">Nuevo Contrato</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="contratoModalLabel">
+          {{ contratoSeleccionado ? 'Editar Contrato' : 'Agregar Contrato' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <form (ngSubmit)="crearContrato()">
+        <form (ngSubmit)="guardarContrato()" [formGroup]="contratoForm">
           <div class="mb-3">
-            <label for="clientName" class="form-label">Nombre Cliente</label>
-            <input type="text" id="clientName" name="clientName" class="form-control" [(ngModel)]="nuevoContrato.clientName" required>
-          </div>
-          <div class="mb-3">
-            <label for="clienteEmail" class="form-label">Email Cliente</label>
-            <input type="email" id="clienteEmail" name="clienteEmail" class="form-control" [(ngModel)]="nuevoContrato.clienteEmail" required>
-          </div>
-          <div class="mb-3">
-            <label for="clienteEmail" class="form-label">Email Cliente</label>
-            <input type="email" id="clientEmail" name="clientEmail" class="form-control" [(ngModel)]="nuevoContrato.clientEmail" required>
-          </div>
-          <div class="mb-3">
-            <label for="description" class="form-label">Descripción</label>
-            <textarea id="description" name="description" class="form-control" [(ngModel)]="nuevoContrato.description" rows="3" required></textarea>
-          </div>
-          <div class="mb-3">
-            <label for="startDate" class="form-label">Fecha Inicio</label>
-            <input type="date" id="startDate" name="startDate" class="form-control" [(ngModel)]="nuevoContrato.startDate" required>
-          </div>
-          <div class="mb-3">
-            <label for="expirationDate" class="form-label">Fecha Vencimiento</label>
-            <input type="date" id="expirationDate" name="expirationDate" class="form-control" [(ngModel)]="nuevoContrato.expirationDate" required>
-          </div>
-          <div class="mb-3">
-            <label for="numeroContrato" class="form-label">Número Contrato</label>
-            <input type="text" id="numeroContrato" name="numeroContrato" class="form-control" [(ngModel)]="nuevoContrato.numeroContrato" required>
+            <label for="clientName" class="form-label">Nombre del Cliente</label>
+            <input type="text" id="clientName" formControlName="clientName" class="form-control" required />
           </div>
 
           <div class="mb-3">
-            <label for="clienteNombre" class="form-label">Nombre Cliente (Responsable)</label>
-            <input type="text" id="clienteNombre" name="clienteNombre" class="form-control" [(ngModel)]="nuevoContrato.clienteNombre" required>
+            <label for="clientEmail" class="form-label">Email del Cliente</label>
+            <input type="email" id="clientEmail" formControlName="clientEmail" class="form-control" required />
           </div>
+
           <div class="mb-3">
-            <label for="fechaVencimiento" class="form-label">Fecha Vencimiento Cliente</label>
-            <input type="date" id="fechaVencimiento" name="fechaVencimiento" class="form-control" [(ngModel)]="nuevoContrato.fechaVencimiento" required>
+            <label for="description" class="form-label">Descripción</label>
+            <textarea id="description" formControlName="description" class="form-control" rows="3" required></textarea>
           </div>
+
           <div class="mb-3">
-            <label for="pdfFile" class="form-label">Archivo PDF</label>
-            <input type="file" id="pdfFile" name="pdfFile" class="form-control" (change)="onFileSelected($event)">
+            <label for="startDate" class="form-label">Fecha de Inicio</label>
+            <input type="date" id="startDate" formControlName="startDate" class="form-control" required />
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar Contrato</button>
+
+          <div class="mb-3">
+            <label for="expirationDate" class="form-label">Fecha de Vencimiento</label>
+            <input type="date" id="expirationDate" formControlName="expirationDate" class="form-control" required />
           </div>
         </form>
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="guardarContrato()">
+          {{ contratoSeleccionado ? 'Actualizar Contrato' : 'Agregar Contrato' }}
+        </button>
+      </div>
     </div>
   </div>
 </div>
-
-  </div>
 </div>
+</div>
+  

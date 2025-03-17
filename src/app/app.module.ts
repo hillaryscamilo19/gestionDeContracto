@@ -15,6 +15,10 @@ import { ConfiguracionNotificacionesComponent } from './component/configuracion-
 // Importa los servicios
 import { ContractoService } from './services/contracto/contracto.service';
 import { ConfiguracionService } from './services/configuracion/configuracion.service';
+import { LoginComponent } from './component/User/login/login/login.component';
+import { RegistreComponent } from './component/User/Registre/registre/registre.component';
+import { AuthServiceService } from './services/auth/auth-service.service';
+
 
 @NgModule({
   declarations: [
@@ -22,7 +26,10 @@ import { ConfiguracionService } from './services/configuracion/configuracion.ser
     ListaContratosComponent,
     FormularioContratoComponent,
     DetalleContratoComponent,
-    ConfiguracionNotificacionesComponent
+    ConfiguracionNotificacionesComponent,
+    LoginComponent,
+    RegistreComponent,
+
   ],
   imports: [
     BrowserModule,
@@ -31,7 +38,9 @@ import { ConfiguracionService } from './services/configuracion/configuracion.ser
     HttpClientModule,
     CommonModule,
     RouterModule.forRoot([
-      { path: '', redirectTo: '/contratos', pathMatch: 'full' },
+      { path: '', redirectTo: '/login', pathMatch: 'full' },
+      { path: 'login', component: LoginComponent },
+      { path: 'register', component: RegistreComponent },
       { path: 'contratos', component: ListaContratosComponent },
       { path: 'nuevo-contrato', component: FormularioContratoComponent },
       { path: 'editar-contrato/:id', component: FormularioContratoComponent },
@@ -41,6 +50,7 @@ import { ConfiguracionService } from './services/configuracion/configuracion.ser
   ],
   providers: [
     ContractoService,
+    AuthServiceService,
     ConfiguracionService
   ],
   bootstrap: [AppComponent]

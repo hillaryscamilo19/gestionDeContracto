@@ -52,6 +52,4 @@ export class ListaContratosComponent implements OnInit {
       }
     });
   }
-
-  // Otros métodos...
 }
