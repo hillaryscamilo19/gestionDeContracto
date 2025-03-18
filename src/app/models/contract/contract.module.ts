@@ -17,5 +17,7 @@ export class ContractModule {
   descripcion: any;
   fechaInicio!: string | number | Date;
   fechaVencimiento!: string | number | Date;
+  expirationDate!: string | number | Date;
   pdfUrl!: string;
+  archivoPdf!: string;
 }

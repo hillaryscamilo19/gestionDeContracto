@@ -20,6 +20,7 @@ import { RegistreComponent } from './component/User/Registre/registre/registre.c
 import { AuthServiceService } from './services/auth/auth-service.service';
 
 
+
 @NgModule({
   declarations: [
     AppComponent,
