@@ -2,7 +2,7 @@
 
   <header class="header">
     <div class="container">
-      <h1>{{ title }}</h1>
+      <h1>Gestion de Contrato</h1>
       <nav>
         <ul>
           <li><a routerLink="/configuracion" routerLinkActive="active">Configuración</a></li>
@@ -65,15 +65,31 @@
                 <input type="text" id="numeroContrato" name="numeroContrato" class="form-control"
                   [(ngModel)]="nuevoContrato.numeroContrato" required>
               </div>
-              <div class="mb-3">
+
+
+              <div class="mb-3" *ngIf="nuevoContrato.contractType">
                 <label for="numeroContrato" class="form-label">Tipo de contrato</label>
-                <select class="form-select" aria-label="Default select example">
-                  <option selected>Seleccionar</option>
-                  <option value="1">locales </option>
-                  <option value="2">internacionales</option>
-                  <option value="3">aseguradora</option>
-                </select>
+                <select class="form-select" [(ngModel)]="nuevoContrato.contractType" name="contractType" required>
+                  <option selected disabled>Seleccionar</option>
+                  <option value="local">Locales</option>
+                  <option value="internacional">Internacionales</option>
+                  <option value="aseguradora">Aseguradora</option>
+                </select>                
               </div>
+
+
+              <div class="mb-3" *ngIf="nuevoContrato.owner">
+                <label for="owner" class="form-label">Propietario Del contracto</label>
+                <select class="form-select" [(ngModel)]="nuevoContrato.owner" name="owner" required>
+                  <option selected disabled>Seleccionar</option>
+                  <option value="ssv">ssv</option>
+                  <option value="klarida">klarida</option>
+                  <option value="abrah">abrah</option>
+                  <option value="softexpert">softexpert</option>
+                </select>                
+              </div>
+
+
               <div class="mb-3">
                 <label for="clienteEmail" class="form-label">Email Empresa</label>
                 <input type="email" id="clienteEmail" name="clienteEmail" class="form-control"

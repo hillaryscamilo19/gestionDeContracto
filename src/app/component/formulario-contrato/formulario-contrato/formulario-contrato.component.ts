@@ -1,10 +1,7 @@
-import { Component, EventEmitter, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ContractoService } from '../../../services/contracto/contracto.service';
-import { faFileCirclePlus } from '@fortawesome/free-solid-svg-icons';
-import { ContractModule } from 'src/app/models/contract/contract.module';
 import { Modal } from 'bootstrap';
-
 
 declare var bootstrap: any;
 
@@ -15,10 +12,11 @@ declare var bootstrap: any;
 })
 export class FormularioContratoComponent implements OnInit {
   @Input() contratos: any[] = [];
+  @Input() cargando: boolean = false;
   contratosFiltrados: any[] = []
   contratoSeleccionado: any = null
+  pdfSeleccionado: File | null = null;
   contratoForm!: FormGroup;
-  cargando = false
   enviando = false
   terminoBusqueda = ""
   archivoSeleccionado: File | null = null
@@ -29,7 +27,6 @@ export class FormularioContratoComponent implements OnInit {
   mensajeAlerta = ""
 
   private modalRef: any
-
   constructor(
     private fb: FormBuilder,
     private contratoService: ContractoService,
@@ -46,7 +43,6 @@ export class FormularioContratoComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-
     const modalElement = document.getElementById("contratoModal")
     if (modalElement) {
       this.modalRef = new Modal(modalElement)
@@ -60,6 +56,81 @@ export class FormularioContratoComponent implements OnInit {
       description: ["", Validators.required],
       startDate: [new Date().toISOString().substring(0, 10), Validators.required],
       expirationDate: ["", Validators.required],
+    })
+  }
+
+
+
+  guardarContrato(): void {
+    if (this.contratoForm.invalid) {
+      Object.keys(this.contratoForm.controls).forEach((key) => {
+        this.contratoForm.get(key)?.markAsTouched()
+      })
+      return
+    }
+
+    this.enviando = true
+    const formData = new FormData()
+    const contratoData = this.contratoForm.value
+    console.log("Datos del contrato a enviar:", contratoData)
+
+    formData.append("contratoData", JSON.stringify(contratoData))
+
+
+    if (this.archivoSeleccionado) {
+      formData.append("archivoPdf", this.archivoSeleccionado)
+    }
+
+    if (this.contratoSeleccionado) {
+      // Update existing contract
+      this.contratoService.actualizarContrato(this.contratoSeleccionado._id, formData).subscribe({
+        next: (contratoActualizado) => {
+          // Update the contract in the list
+          const index = this.contratos.findIndex((c) => c._id === contratoActualizado._id)
+          if (index !== -1) {
+            this.contratos[index] = contratoActualizado
+            this.ordenarContratosPorEstado()
+          }
+
+          this.mostrarMensaje("success", "Contrato actualizado correctamente")
+          this.cerrarModal()
+          this.enviando = false
+        },
+        error: (error) => {
+          console.error("Error al actualizar contrato:", error)
+          this.mostrarMensaje("danger", "Error al actualizar el contrato")
+          this.enviando = false
+        },
+      })
+    } else {
+      // Create new contract
+      this.contratoService.crearContrato(formData).subscribe({
+        next: (nuevoContrato) => {
+          this.contratos.push(nuevoContrato)
+          this.ordenarContratosPorEstado()
+          this.mostrarMensaje("success", "Contrato creado correctamente")
+          this.cerrarModal()
+          this.enviando = false
+        },
+        error: (error) => {
+          console.error("Error completo:", error)
+          this.mostrarMensaje("danger", "Error al crear el contrato")
+          this.enviando = false
+        },
+      })
+    }
+  }
+
+  ordenarContratosPorEstado(): void {
+    this.contratos.sort((a, b) => {
+      const estadoA = this.getEstadoTexto(a)
+      const estadoB = this.getEstadoTexto(b)
+      const prioridad: Record<string, number> = {
+        Activo: 1,
+        "Por vencer": 2,
+        Vencido: 3,
+      }
+      return (prioridad[estadoA] || 999) - (prioridad[estadoB] || 999)
     })
   }
 
@@ -99,16 +170,18 @@ export class FormularioContratoComponent implements OnInit {
   editarContrato(id: string): void {
     this.cargando = true
     this.contratoService.getContrato(id).subscribe({
-      next: (contrato: { clienteNombre: any; clienteEmail: any; descripcion: any; fechaInicio: string | number | Date; fechaVencimiento: string | number | Date; archivoPdf: { nombre: string; }; }) => {
+      next: (contrato: { clienteNombre: any; numeroContrato: any; clienteEmail: any; descripcion: any; fechaInicio: string | number | Date; fechaVencimiento: string | number | Date; archivoPdf: { nombre: string; }; }) => {
         this.contratoSeleccionado = contrato
 
 
         this.contratoForm.patchValue({
           clientName: contrato.clienteNombre,
+          numeroContrato: contrato.numeroContrato,
           clientEmail: contrato.clienteEmail,
           description: contrato.descripcion,
           startDate: new Date(contrato.fechaInicio).toISOString().substring(0, 10),
           expirationDate: new Date(contrato.fechaVencimiento).toISOString().substring(0, 10),
+          archivoPdf: contrato.archivoPdf
         })
 
 
@@ -128,60 +201,7 @@ export class FormularioContratoComponent implements OnInit {
     })
   }
 
-  guardarContrato(): void {
-    if (this.contratoForm.invalid) {
 
-      Object.keys(this.contratoForm.controls).forEach((key) => {
-        this.contratoForm.get(key)?.markAsTouched()
-      })
-      return
-    }
-
-    this.enviando = true
-    const formData = new FormData()
-
-    formData.append("contratoData", JSON.stringify(this.contratoForm.value))
-
-    if (this.archivoSeleccionado) {
-      formData.append("archivoPdf", this.archivoSeleccionado)
-    }
-
-    if (this.contratoSeleccionado) {
-      this.contratoService.actualizarContrato(this.contratoSeleccionado._id, formData).subscribe({
-        next: (contratoActualizado: { _id: any; }) => {
-          const index = this.contratos.findIndex((c) => c._id === contratoActualizado._id)
-          if (index !== -1) {
-            this.contratos[index] = contratoActualizado
-            this.contratosFiltrados = [...this.contratos]
-          }
-
-          this.mostrarMensaje("success", "Contrato actualizado correctamente")
-          this.cerrarModal()
-          this.enviando = false
-        },
-        error: (error: any) => {
-          console.error("Error al actualizar contrato:", error)
-          this.mostrarMensaje("danger", "Error al actualizar el contrato")
-          this.enviando = false
-        },
-      })
-    } else {
-      this.contratoService.crearContrato(formData).subscribe({
-        next: (nuevoContrato: any) => {
-          this.contratos.push(nuevoContrato)
-          this.contratosFiltrados = [...this.contratos]
-          this.mostrarMensaje("success", "Contrato creado correctamente")
-          this.cerrarModal()
-          this.enviando = false
-        },
-        error: (error: any) => {
-          console.error("Error al crear contrato:", error)
-          this.mostrarMensaje("danger", "Error al crear el contrato")
-          this.enviando = false
-        },
-      })
-    }
-  }
 
   eliminarContrato(id: string): void {
     if (confirm("¿Está seguro de eliminar este contrato?")) {
@@ -242,13 +262,13 @@ export class FormularioContratoComponent implements OnInit {
     return contrato.archivoPdf && contrato.archivoPdf.nombre
   }
 
-  descargarPdf(id: string, nombreCliente: string): void {
+  descargarPdf(id: string, clientName: string): void {
     this.contratoService.descargarPdf(id).subscribe({
       next: (blob: Blob | MediaSource) => {
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement("a")
         a.href = url
-        a.download = `contrato-${nombreCliente}.pdf`
+        a.download = `contrato-${clientName}.pdf`
         document.body.appendChild(a)
         a.click()
 
@@ -268,7 +288,6 @@ export class FormularioContratoComponent implements OnInit {
       this.contratosFiltrados = [...this.contratos]
       return
     }
-
     const termino = this.terminoBusqueda.toLowerCase().trim()
     this.contratosFiltrados = this.contratos.filter(
       (contrato) =>
@@ -282,29 +301,13 @@ export class FormularioContratoComponent implements OnInit {
   getEstadoTexto(contrato: any): string {
     try {
       const hoy = new Date()
-
-
       const fechaVencimientoStr = contrato.fechaVencimiento || contrato.expirationDate
-
       if (!fechaVencimientoStr) {
         console.error("Contrato sin fecha de vencimiento:", contrato)
         return "Desconocido"
       }
-
       const fechaVencimiento = new Date(fechaVencimientoStr)
-
-
       const diasRestantes = Math.ceil((fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
-
-      console.log(
-        "Contrato:",
-        contrato.clienteNombre || contrato.clientName,
-        "Fecha vencimiento:",
-        fechaVencimiento.toISOString().split("T")[0],
-        "Días restantes:",
-        diasRestantes,
-      )
-
       if (diasRestantes < 0) {
         return "Vencido"
       } else if (diasRestantes <= 30) {
@@ -347,8 +350,6 @@ export class FormularioContratoComponent implements OnInit {
     this.tipoAlerta = tipo
     this.mensajeAlerta = mensaje
     this.mostrarAlerta = true
-
-
     setTimeout(() => {
       this.mostrarAlerta = false
     }, 5000)
@@ -370,5 +371,32 @@ export class FormularioContratoComponent implements OnInit {
       )
     })
   }
+
+
+  nuevoContrato: any = {
+    clientName: '',
+    clientEmail: '',
+    description: '',
+    startDate: new Date().toISOString().split('T')[0],
+    expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    numeroContrato: '',
+    clienteNombre: '',
+    fechaVencimiento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  };
+
+  resetearFormulario() {
+    this.nuevoContrato = {
+      clientName: '',
+      clientEmail: '',
+      description: '',
+      startDate: '',
+      expirationDate: '',
+      numeroContrato: '',
+      clienteNombre: '',
+      fechaVencimiento: '',
+
+    };
+  }
+
 }
 

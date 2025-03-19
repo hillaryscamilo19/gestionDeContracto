@@ -147,6 +147,85 @@
     </table>
   </div>
 
+<!--Modal para crear y editar-->
+<div class="modal fade" id="contratoModal" tabindex="-1" aria-labelledby="nuevoContratoModalLabel"
+aria-hidden="true">
+<div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="nuevoContratoModalLabel">Nuevo Contrato</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="guardarContrato()">
+        <div class="mb-3">
+          <label for="clientName" class="form-label">Nombre Proveedor</label>
+          <input type="text" id="clientName" name="clientName" class="form-control"
+            [(ngModel)]="nuevoContrato.clientName" required>
+        </div>
+        <div class="mb-3">
+          <label for="clientEmail" class="form-label">Email Proveedor</label>
+          <input type="email" id="clientEmail" name="clientEmail" class="form-control"
+            [(ngModel)]="nuevoContrato.clientEmail" required>
+        </div>
+        <div class="mb-3">
+          <label for="description" class="form-label">Descripción Contrato</label>
+          <textarea id="description" name="description" class="form-control"
+            [(ngModel)]="nuevoContrato.description" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="startDate" class="form-label">Fecha Inicio</label>
+          <input type="date" id="startDate" name="startDate" class="form-control"
+            [(ngModel)]="nuevoContrato.startDate" required>
+        </div>
+        <div class="mb-3">
+          <label for="expirationDate" class="form-label">Fecha Vencimiento</label>
+          <input type="date" id="expirationDate" name="expirationDate" class="form-control"
+            [(ngModel)]="nuevoContrato.expirationDate" required>
+        </div>
+        <div class="mb-3">
+          <label for="numeroContrato" class="form-label">Número Contrato</label>
+          <input type="text" id="numeroContrato" name="numeroContrato" class="form-control"
+            [(ngModel)]="nuevoContrato.numeroContrato" required>
+        </div>
+        <div class="mb-3">
+          <label for="numeroContrato" class="form-label">Tipo de contrato</label>
+          <select class="form-select" aria-label="Default select example">
+            <option selected>Seleccionar</option>
+            <option value="1">locales </option>
+            <option value="2">internacionales</option>
+            <option value="3">aseguradora</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="clienteEmail" class="form-label">Email Empresa</label>
+          <input type="email" id="clienteEmail" name="clienteEmail" class="form-control"
+            [(ngModel)]="nuevoContrato.clienteEmail" required>
+        </div>
+        <div class="mb-3">
+          <label for="clienteNombre" class="form-label">Nombre Empresa (Responsable)</label>
+          <input type="text" id="clienteNombre" name="clienteNombre" class="form-control"
+            [(ngModel)]="nuevoContrato.clienteNombre" required>
+        </div>
+        <div class="mb-3">
+          <label for="pdfFile" class="form-label">Archivo PDF</label>
+          <input type="file" id="pdfFile" name="pdfFile" class="form-control" (change)="onFileSelected($event)">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Contrato</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+
+
+
+
+
+  <!-- Modal Para Vizualizar los detalles del Contrato  -->
 <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">

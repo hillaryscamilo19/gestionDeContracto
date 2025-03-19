@@ -1,0 +1,146 @@
+<div class="container">
+    <h2>{{ modoEdicion ? 'Editar' : 'Nuevo' }} Contrato</h2>
+  
+    <div *ngIf="cargando" class="loading">Cargando datos...</div>
+  
+    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  
+    <form [formGroup]="contratoForm" (ngSubmit)="guardarContrato()" *ngIf="!cargando" enctype="multipart/form-data">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="clientId" class="form-label">Cliente *</label>
+          <select id="clientId" formControlName="clientId" class="form-select" (change)="onClientChange($event)"
+                  [ngClass]="{'is-invalid': contratoForm.get('clientId')?.invalid && contratoForm.get('clientId')?.touched}">
+            <option value="">Seleccione un cliente</option>
+            <option *ngFor="let client of clients" [value]="client._id">{{ client.name }}</option>
+          </select>
+          <div *ngIf="contratoForm.get('clientId')?.invalid && contratoForm.get('clientId')?.touched" class="invalid-feedback">
+            Debe seleccionar un cliente
+          </div>
+        </div>
+  
+        <div class="col-md-6">
+          <label for="contractNumber" class="form-label">Número de Contrato *</label>
+          <input type="text" id="contractNumber" formControlName="contractNumber" class="form-control"
+                 [ngClass]="{'is-invalid': contratoForm.get('contractNumber')?.invalid && contratoForm.get('contractNumber')?.touched}">
+          <div *ngIf="contratoForm.get('contractNumber')?.invalid && contratoForm.get('contractNumber')?.touched" class="invalid-feedback">
+            El número de contrato es requerido
+          </div>
+        </div>
+      </div>
+  
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="clientName" class="form-label">Nombre del Cliente *</label>
+          <input type="text" id="clientName" formControlName="clientName" class="form-control" readonly
+                 [ngClass]="{'is-invalid': contratoForm.get('clientName')?.invalid && contratoForm.get('clientName')?.touched}">
+          <div *ngIf="contratoForm.get('clientName')?.invalid && contratoForm.get('clientName')?.touched" class="invalid-feedback">
+            El nombre del cliente es requerido
+          </div>
+        </div>
+  
+        <div class="col-md-6">
+          <label for="clientEmail" class="form-label">Email del Cliente *</label>
+          <input type="email" id="clientEmail" formControlName="clientEmail" class="form-control" readonly
+                 [ngClass]="{'is-invalid': contratoForm.get('clientEmail')?.invalid && contratoForm.get('clientEmail')?.touched}">
+          <div *ngIf="contratoForm.get('clientEmail')?.invalid && contratoForm.get('clientEmail')?.touched" class="invalid-feedback">
+            Ingrese un email válido
+          </div>
+        </div>
+      </div>
+  
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label for="contractType" class="form-label">Tipo de Contrato *</label>
+          <select id="contractType" formControlName="contractType" class="form-select"
+                  [ngClass]="{'is-invalid': contratoForm.get('contractType')?.invalid && contratoForm.get('contractType')?.touched}">
+            <option value="local">Local</option>
+            <option value="internacional">Internacional</option>
+            <option value="aseguradora">Aseguradora</option>
+          </select>
+          <div *ngIf="contratoForm.get('contractType')?.invalid && contratoForm.get('contractType')?.touched" class="invalid-feedback">
+            Debe seleccionar un tipo de contrato
+          </div>
+        </div>
+  
+        <div class="col-md-4">
+          <label for="owner" class="form-label">Propietario *</label>
+          <select id="owner" formControlName="owner" class="form-select"
+                  [ngClass]="{'is-invalid': contratoForm.get('owner')?.invalid && contratoForm.get('owner')?.touched}">
+            <option value="ssv">SSV</option>
+            <option value="klarida">Klarida</option>
+            <option value="abrah">Abrah</option>
+            <option value="softexpert">Softexpert</option>
+          </select>
+          <div *ngIf="contratoForm.get('owner')?.invalid && contratoForm.get('owner')?.touched" class="invalid-feedback">
+            Debe seleccionar un propietario
+          </div>
+        </div>
+  
+        <div class="col-md-4">
+          <label for="serviceType" class="form-label">Tipo de Servicio *</label>
+          <input type="text" id="serviceType" formControlName="serviceType" class="form-control"
+                 [ngClass]="{'is-invalid': contratoForm.get('serviceType')?.invalid && contratoForm.get('serviceType')?.touched}">
+          <div *ngIf="contratoForm.get('serviceType')?.invalid && contratoForm.get('serviceType')?.touched" class="invalid-feedback">
+            El tipo de servicio es requerido
+          </div>
+        </div>
+      </div>
+  
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="startDate" class="form-label">Fecha de Inicio *</label>
+          <input type="date" id="startDate" formControlName="startDate" class="form-control"
+                 [ngClass]="{'is-invalid': contratoForm.get('startDate')?.invalid && contratoForm.get('startDate')?.touched}">
+          <div *ngIf="contratoForm.get('startDate')?.invalid && contratoForm.get('startDate')?.touched" class="invalid-feedback">
+            La fecha de inicio es requerida
+          </div>
+        </div>
+  
+        <div class="col-md-6">
+          <label for="expirationDate" class="form-label">Fecha de Vencimiento *</label>
+          <input type="date" id="expirationDate" formControlName="expirationDate" class="form-control"
+                 [ngClass]="{'is-invalid': contratoForm.get('expirationDate')?.invalid && contratoForm.get('expirationDate')?.touched}">
+          <div *ngIf="contratoForm.get('expirationDate')?.invalid && contratoForm.get('expirationDate')?.touched" class="invalid-feedback">
+            La fecha de vencimiento es requerida
+          </div>
+        </div>
+      </div>
+  
+      <div class="mb-3">
+        <label for="description" class="form-label">Descripción</label>
+        <textarea id="description" formControlName="description" class="form-control" rows="3"></textarea>
+      </div>
+  
+      <div class="mb-3">
+        <label for="archivoPdf" class="form-label">Archivo PDF del Contrato {{ modoEdicion ? '(opcional)' : '*' }}</label>
+        <div class="file-upload">
+          <input type="file" id="archivoPdf" (change)="onFileSelected($event)" accept=".pdf" class="file-input">
+          <div class="file-upload-info">
+            <button type="button" class="btn btn-outline-secondary">Seleccionar archivo</button>
+            <span class="file-name ms-2">{{ nombreArchivo || 'Ningún archivo seleccionado' }}</span>
+          </div>
+        </div>
+        <small class="form-text text-muted">Solo archivos PDF (máximo 5MB)</small>
+      </div>
+  
+      <!-- Mostrar enlace al contrato anterior si existe -->
+      <div class="mb-3" *ngIf="previousContractUrl">
+        <label class="form-label">Contrato Anterior</label>
+        <div>
+          <button type="button" class="btn btn-outline-info" (click)="verContratoAnterior(contratos)">
+            <i class="bi bi-file-earmark-pdf"></i> Ver contrato anterior
+          </button>
+        </div>
+      </div>
+  
+      <div class="d-flex justify-content-between">
+        <button type="button" class="btn btn-secondary" routerLink="/contratos">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="contratoForm.invalid || enviando">
+          {{ enviando ? 'Guardando...' : (modoEdicion ? 'Actualizar' : 'Guardar') }}
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  

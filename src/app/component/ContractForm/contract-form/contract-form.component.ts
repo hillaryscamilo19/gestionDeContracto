@@ -1,18 +1,16 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ContractoService } from './services/contracto/contracto.service';
-import { Client, ContractModule } from './models/contract/contract.module';
 import { Modal } from 'bootstrap';
-import { ClienteService } from './services/Cliente/cliente.service';
+
+import { ClienteService } from 'src/app/services/Cliente/cliente.service';
+import { ContractoService } from 'src/app/services/contracto/contracto.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  selector: 'app-contract-form',
+  templateUrl: './contract-form.component.html',
+  styleUrls: ['./contract-form.component.css']
 })
-export class AppComponent {
-
-  title: "Gestion de Contrato" | undefined;
+export class ContractFormComponent {
   contratos: any[] = []
   contratosFiltrados: any[] = []
   contratoSeleccionado: any = null
@@ -21,32 +19,27 @@ export class AppComponent {
   enviando = false
   terminoBusqueda = ""
   clients: any[] = []
+
+  // Variables para manejo de archivos
   archivoSeleccionado: File | null = null
   nombreArchivo = ""
   errorArchivo = ""
+
+  // Variables para alertas
   mostrarAlerta = false
   tipoAlerta = "success"
   mensajeAlerta = ""
+
+  // Referencia al modal
   private modalRef: any
-
-  nuevoContrato: any = {
-    clientName: "",
-    clientEmail: "",
-    description: "",
-    startDate: new Date().toISOString().split("T")[0],
-    expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    numeroContrato: "",
-    contractType: { type: String, enum: ["local", "internacional", "aseguradora"], default: "local" },
-    owner: { type: String, enum: ["ssv", "klarida", "abrah", "softexpert"], default: "local" },
-  }
-  pdfSeleccionado: File | null = null
-  currentYear: any;
-
+error: any;
+modoEdicion: any;
+previousContractUrl: any;
 
   constructor(
     private fb: FormBuilder,
     private contratoService: ContractoService,
-    private clientService: ClienteService,
+    private clientService: ClienteService
   ) {}
 
   ngOnInit(): void {
@@ -54,17 +47,22 @@ export class AppComponent {
     this.cargarClientes()
     this.cargarContratos()
 
+    // Añadir un pequeño retraso para asegurar que los contratos se han cargado
     setTimeout(() => {
       this.depurarContratos()
     }, 2000)
   }
 
   ngAfterViewInit() {
+    // Obtener referencia al modal para poder cerrarlo programáticamente
     const modalElement = document.getElementById("contratoModal")
     if (modalElement) {
       this.modalRef = new Modal(modalElement)
     }
   }
+
+
+
 
   inicializarFormulario(): void {
     this.contratoForm = this.fb.group({
@@ -75,8 +73,8 @@ export class AppComponent {
       description: ["", Validators.required],
       startDate: [new Date().toISOString().substring(0, 10), Validators.required],
       expirationDate: ["", Validators.required],
-      contractType: ["", Validators.required],
-      owner: ["", Validators.required],
+      contractType: ["local", Validators.required],
+      owner: ["ssv", Validators.required],
       serviceType: ["", Validators.required],
     })
   }
@@ -98,10 +96,8 @@ export class AppComponent {
     this.contratoService.getContratos().subscribe({
       next: (data) => {
         this.contratos = data
-      
+   
         this.contratosFiltrados = [...this.contratos]
-
-        // Depuración: Mostrar los estados de los contratos
         this.contratos.forEach((contrato) => {
           console.log(
             "Contrato:",
@@ -120,6 +116,8 @@ export class AppComponent {
       },
     })
   }
+
+
 
 
   onClientChange(event: any): void {
@@ -151,7 +149,6 @@ export class AppComponent {
       next: (contrato) => {
         this.contratoSeleccionado = contrato
 
-        // Actualizar el formulario con los datos del contrato
         this.contratoForm.patchValue({
           clientId: contrato.clientId || "",
           clientName: contrato.clienteNombre || contrato.clientName,
@@ -165,7 +162,6 @@ export class AppComponent {
           serviceType: contrato.serviceType || "",
         })
 
-        // Si el contrato tiene un archivo PDF, mostrar su nombre
         if (contrato.archivoPdf && contrato.archivoPdf.nombre) {
           this.nombreArchivo = contrato.archivoPdf.nombre
         } else {
@@ -217,7 +213,7 @@ export class AppComponent {
           const index = this.contratos.findIndex((c) => c._id === contratoActualizado._id)
           if (index !== -1) {
             this.contratos[index] = contratoActualizado
-       
+        
           }
 
           this.mostrarMensaje("success", "Contrato actualizado correctamente")
@@ -237,7 +233,7 @@ export class AppComponent {
       this.contratoService.crearContrato(formData).subscribe({
         next: (nuevoContrato) => {
           this.contratos.push(nuevoContrato)
-
+    
           this.mostrarMensaje("success", "Contrato creado correctamente")
           this.cerrarModal()
           this.enviando = false
@@ -271,14 +267,32 @@ export class AppComponent {
   verContrato(contrato: any): void {
     this.contratoSeleccionado = contrato
     console.log("Contrato seleccionado:", this.contratoSeleccionado)
+    // No es necesario abrir el modal aquí, ya que se abre con data-bs-target="#staticBackdrop"
   }
 
   // Métodos para manejo de archivos
-  onFileSelected(event: any) {
-    const file = event.target.files[0]; // Obtiene el primer archivo seleccionado
+  onFileSelected(event: any): void {
+    const file = event.target.files[0]
     if (file) {
-      this.pdfSeleccionado = file;
-      console.log("Archivo seleccionado:", this.pdfSeleccionado);
+      // Verificar que sea un PDF
+      if (file.type !== "application/pdf") {
+        this.errorArchivo = "Solo se permiten archivos PDF"
+        this.archivoSeleccionado = null
+        this.nombreArchivo = ""
+        return
+      }
+
+      // Verificar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.errorArchivo = "El archivo no debe superar los 5MB"
+        this.archivoSeleccionado = null
+        this.nombreArchivo = ""
+        return
+      }
+
+      this.archivoSeleccionado = file
+      this.nombreArchivo = file.name
+      this.errorArchivo = ""
     }
   }
 
@@ -321,7 +335,7 @@ export class AppComponent {
     })
   }
 
-  // Métodos para filtrar y clasificar contratos
+  
   filtrarContratos(): void {
     if (!this.terminoBusqueda.trim()) {
       this.contratosFiltrados = [...this.contratos]
@@ -340,12 +354,10 @@ export class AppComponent {
     )
   }
 
-  // Reemplazar la función getEstadoTexto con esta versión mejorada
   getEstadoTexto(contrato: any): string {
     try {
       const hoy = new Date()
 
-      // Verificar qué propiedad está usando el objeto contrato
       const fechaVencimientoStr = contrato.fechaVencimiento || contrato.expirationDate
 
       if (!fechaVencimientoStr) {
@@ -395,19 +407,18 @@ export class AppComponent {
     }
   }
 
-  // Método para filtrar contratos por estado
+
   filtrarPorEstado(estado: string): any[] {
     return this.contratos.filter((contrato) => this.getEstadoTexto(contrato) === estado)
   }
 
-  // Método para cerrar el modal
   cerrarModal(): void {
     if (this.modalRef) {
       this.modalRef.hide()
     }
   }
 
-  // Método para mostrar mensajes de alerta
+
   mostrarMensaje(tipo: string, mensaje: string): void {
     this.tipoAlerta = tipo
     this.mensajeAlerta = mensaje
@@ -437,15 +448,15 @@ export class AppComponent {
     })
   }
 
-  // Obtener el nombre del cliente a partir del ID
+  
   getClientName(clientId: string): string {
     const client = this.clients.find((c) => c._id === clientId)
     return client ? client.name : "Cliente no encontrado"
   }
 
-  // Obtener el nombre del tipo de contrato
+
   getContractTypeName(type: string): string {
-    const types: Record<string, string> = {
+    const types:  Record<string, string> = {
       local: "Local",
       internacional: "Internacional",
       aseguradora: "Aseguradora",
@@ -453,9 +464,8 @@ export class AppComponent {
     return types[type] || type
   }
 
-  // Obtener el nombre del propietario
   getOwnerName(owner: string): string {
-    const owners: Record<string, string> = {
+    const owners : Record<string, string> = {
       ssv: "SSV",
       klarida: "Klarida",
       abrah: "Abrah",
@@ -472,91 +482,4 @@ export class AppComponent {
     }
   }
 
-  crearContrato() {
-    console.log("Datos a enviar:", this.nuevoContrato)
-    const formData = new FormData()
-    const camposRequeridos = [
-      "clientName",
-      "clientEmail",
-      "description",
-      "startDate",
-      "expirationDate",
-      "numeroContrato",
-      "contractType",
-      "owner"
-    ]
-    if (!this.nuevoContrato.clientName || !this.nuevoContrato.description || !this.nuevoContrato.clientEmail || !this.nuevoContrato.startDate  || !this.nuevoContrato.expirationDate || !this.nuevoContrato.numeroContrato || !this.nuevoContrato.contractType || !this.nuevoContrato.owner ) {
-      alert("Faltan datos obligatorios");
-      return;
-  }
-  
-    const camposFaltantes = camposRequeridos.filter(
-      (campo) => !this.nuevoContrato[campo] || this.nuevoContrato[campo] === "",
-    )
-    if (camposFaltantes.length > 0) {
-      alert(`Por favor complete los siguientes campos: ${camposFaltantes.join(", ")}`)
-      return
-    }
-    
-
-    if (!this.nuevoContrato.clientName?.trim()) {
-      alert("El campo Nombre del Cliente es obligatorio")
-      return
-    }
-
-    if (!this.nuevoContrato.clientEmail?.trim()) {
-      alert("El campo Email del Cliente es obligatorio")
-      return
-    }
-
-
-    const contratoData = {
-      clienteNombre: this.nuevoContrato.clienteNombre.trim(),
-      clienteEmail: this.nuevoContrato.clienteEmail.trim(),
-      description: this.nuevoContrato.description,
-      startDate: this.nuevoContrato.startDate,
-      expirationDate: this.nuevoContrato.expirationDate,
-      numeroContrato: this.nuevoContrato.numeroContrato,
-      contractType: this.nuevoContrato.contractType,
-      owner: this.nuevoContrato.owner,
-      serviceType: this.nuevoContrato.serviceType,
-      archivoPdf: this.nuevoContrato.pdfSeleccionado
-    }
-    formData.append("contratoData", JSON.stringify(contratoData))
-    if (this.pdfSeleccionado) {
-      formData.append("archivoPdf", this.pdfSeleccionado)
-    }
-    this.contratoService.crearContrato(formData).subscribe({
-      next: (res: any) => {
-        console.log("Contrato creado:", res)
-        alert("Contrato creado exitosamente")
-        this.cargarContratos()
-        this.cerrarModal()
-        this.resetearFormulario()
-      },
-      error: (error: any) => {
-        console.error("Error completo:", error)
-        let mensajeError = "Error al crear contrato"
-
-        if (error.error) {
-          if (error.error.mensaje) mensajeError += ": " + error.error.mensaje
-          if (error.error.error) mensajeError += "\n" + error.error.error
-        }
-
-        alert(mensajeError)
-      },
-    })
-  }
-
-  resetearFormulario() {
-    this.nuevoContrato = {
-      clientName: "",
-      clientEmail: "",
-      description: "",
-      startDate: new Date().toISOString().split("T")[0],
-      expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-      numeroContrato: "",
-    }
-    this.pdfSeleccionado = null
-  }
 }

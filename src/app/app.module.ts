@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -18,6 +18,9 @@ import { ConfiguracionService } from './services/configuracion/configuracion.ser
 import { LoginComponent } from './component/User/login/login/login.component';
 import { RegistreComponent } from './component/User/Registre/registre/registre.component';
 import { AuthServiceService } from './services/auth/auth-service.service';
+import { ClienteComponent } from './component/cliente/cliente/cliente.component';
+import { ContractFormComponent } from './component/ContractForm/contract-form/contract-form.component';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 
 
@@ -30,6 +33,8 @@ import { AuthServiceService } from './services/auth/auth-service.service';
     ConfiguracionNotificacionesComponent,
     LoginComponent,
     RegistreComponent,
+    ClienteComponent,
+    ContractFormComponent,
 
   ],
   imports: [
@@ -39,20 +44,23 @@ import { AuthServiceService } from './services/auth/auth-service.service';
     HttpClientModule,
     CommonModule,
     RouterModule.forRoot([
-      { path: '', redirectTo: '/login', pathMatch: 'full' },
+      { path: '', redirectTo: '/contratos', pathMatch: 'full' },
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegistreComponent },
       { path: 'contratos', component: ListaContratosComponent },
+      {path:  'clientes', component: ClienteComponent},
       { path: 'nuevo-contrato', component: FormularioContratoComponent },
       { path: 'editar-contrato/:id', component: FormularioContratoComponent },
       { path: 'detalle-contrato/:id', component: DetalleContratoComponent },
-      { path: 'configuracion', component: ConfiguracionNotificacionesComponent }
+      { path: 'configuracion', component: ConfiguracionNotificacionesComponent },
+      { path: "**", redirectTo: "/contratos" }
     ])
   ],
   providers: [
     ContractoService,
     AuthServiceService,
-    ConfiguracionService
+    ConfiguracionService,
+    [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   ],
   bootstrap: [AppComponent]
 })
