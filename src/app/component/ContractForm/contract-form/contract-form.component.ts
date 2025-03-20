@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Modal } from 'bootstrap';
 
@@ -11,7 +11,7 @@ import { ContractoService } from 'src/app/services/contracto/contracto.service';
   styleUrls: ['./contract-form.component.css']
 })
 export class ContractFormComponent {
-  contratos: any[] = []
+  @Input() contratos: any[] = [];
   contratosFiltrados: any[] = []
   contratoSeleccionado: any = null
   contratoForm!: FormGroup
@@ -60,10 +60,6 @@ previousContractUrl: any;
       this.modalRef = new Modal(modalElement)
     }
   }
-
-
-
-
   inicializarFormulario(): void {
     this.contratoForm = this.fb.group({
       clientId: ["", Validators.required],
@@ -116,10 +112,7 @@ previousContractUrl: any;
       },
     })
   }
-
-
-
-
+  
   onClientChange(event: any): void {
     const clientId = event.target.value
     if (clientId) {

@@ -1,54 +1,59 @@
+<div class="header">
 <div class="container">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="text">Gestión de Clientes</h2>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal" (click)="openForm()">
+        <i class="bi bi-plus-circle"></i> Nuevo Cliente
+      </button>
+    </div>
+  </div>
 
+  <div class="mb-3">
+    <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="Buscar cliente">
+  </div>
 
-    <div class="row mb-4">
-      <div class="col">
-        <h2>Gestión de Clientes</h2>
-      </div>
-      <div class="col-auto">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal" (click)="openForm()">
-          <i class="bi bi-plus-circle"></i> Nuevo Cliente
-        </button>
-      </div>
+  <div *ngIf="loading" class="text-center my-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
     </div>
-  
-    <div *ngIf="loading" class="text-center my-4">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Cargando...</span>
-      </div>
-    </div>
-  
-    <div *ngIf="!loading && clients.length === 0" class="alert alert-info">
-      No hay clientes registrados.
-    </div>
-  
-    <div class="table-responsive" *ngIf="!loading && clients.length > 0">
-        <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Email</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let client of clients">
-                <td>{{ client.name }}</td>
-                <td>{{ client.lastName }}</td>
-                <td>{{ client.email }}</td>
-                <td>
-                  <button class="btn btn-sm btn-outline-info" [routerLink]="['/clientes/edit', client._id]">
-                    Editar
-                  </button>
-                  <button class="btn btn-sm btn-outline-danger" (click)="deleteClient(client._id || '')">
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>          
-    </div>
+  </div>
+
+  <div *ngIf="!loading && clients.length === 0" class="alert alert-info">
+    No hay clientes registrados.
+  </div>
+
+  <div class="table-responsive" *ngIf="!loading && clients.length > 0">
+      <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Telefono</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let client of clients">
+              <td>{{ client.name }}</td>
+              <td>{{ client.lastName }}</td>
+              <td>{{ client.phone }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-info" [routerLink]="['/clientes/edit', client._id]">
+                  Editar
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="deleteClient(client._id || '')">
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>          
+  </div>
+</div>
+    
   
     <!-- Modal para crear/editar cliente -->
     <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="clientModalLabel" aria-hidden="true">
@@ -66,6 +71,15 @@
                        [ngClass]="{'is-invalid': clientForm.get('name')?.invalid && clientForm.get('name')?.touched}">
                 <div class="invalid-feedback" *ngIf="clientForm.get('name')?.invalid && clientForm.get('name')?.touched">
                   El nombre es requerido
+                </div>
+
+              </div>
+              <div class="mb-3">
+                <label for="name" class="form-label">Apellido *</label>
+                <input type="text" class="form-control" id="name" formControlName="name" 
+                       [ngClass]="{'is-invalid': clientForm.get('name')?.invalid && clientForm.get('name')?.touched}">
+                <div class="invalid-feedback" *ngIf="clientForm.get('name')?.invalid && clientForm.get('name')?.touched">
+                  El Apellido es requerido
                 </div>
               </div>
   

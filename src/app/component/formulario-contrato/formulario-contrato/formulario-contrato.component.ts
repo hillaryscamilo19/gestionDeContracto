@@ -59,8 +59,6 @@ export class FormularioContratoComponent implements OnInit {
     })
   }
 
-
-
   guardarContrato(): void {
     if (this.contratoForm.invalid) {
       Object.keys(this.contratoForm.controls).forEach((key) => {

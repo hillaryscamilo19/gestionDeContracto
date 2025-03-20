@@ -49,6 +49,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
       { path: 'register', component: RegistreComponent },
       { path: 'contratos', component: ListaContratosComponent },
       {path:  'clientes', component: ClienteComponent},
+      { path: 'contrato', component: ContractFormComponent },
       { path: 'nuevo-contrato', component: FormularioContratoComponent },
       { path: 'editar-contrato/:id', component: FormularioContratoComponent },
       { path: 'detalle-contrato/:id', component: DetalleContratoComponent },

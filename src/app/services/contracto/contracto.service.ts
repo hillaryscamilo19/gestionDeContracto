@@ -8,7 +8,7 @@ import { environment } from 'src/environments/environment';
 })
 export class ContractoService {
 constructor(private http: HttpClient) {}
-private apiUrl = `${environment.apiUrl}/contratos`
+  private apiUrl = "http://localhost:3000/api/contratos"
 
 
 getContratos(): Observable<any[]> {
@@ -35,18 +35,14 @@ getContrato(id: string): Observable<any> {
 
 
 crearContrato(formData: FormData): Observable<any> {
-
-  console.log("Creando contrato en:", this.apiUrl)
-  return this.http.post<any>(this.apiUrl, formData).pipe(
-    
-    tap((response) => console.log("Contrato creado:", response)),
+  console.log("Enviando datos al servidor:", formData)
+  return this.http.post(this.apiUrl, formData).pipe(
     catchError((error) => {
-      console.error("Error al crear contrato:", error)
+      console.error("Error en el servicio:", error)
       return throwError(() => error)
     }),
   )
 }
-
 actualizarContrato(id: string, formData: FormData | any): Observable<any> {
 
   if (typeof id !== "string") {

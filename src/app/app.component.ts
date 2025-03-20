@@ -275,12 +275,17 @@ export class AppComponent {
 
   // Métodos para manejo de archivos
   onFileSelected(event: any) {
-    const file = event.target.files[0]; // Obtiene el primer archivo seleccionado
+    const file = event.target.files[0];
     if (file) {
+      if (file.type !== "application/pdf") {
+        alert("Solo se permiten archivos PDF");
+        return;
+      }
       this.pdfSeleccionado = file;
       console.log("Archivo seleccionado:", this.pdfSeleccionado);
     }
   }
+  
 
   limpiarArchivo(): void {
     this.archivoSeleccionado = null
@@ -485,67 +490,42 @@ export class AppComponent {
       "contractType",
       "owner"
     ]
-    if (!this.nuevoContrato.clientName || !this.nuevoContrato.description || !this.nuevoContrato.clientEmail || !this.nuevoContrato.startDate  || !this.nuevoContrato.expirationDate || !this.nuevoContrato.numeroContrato || !this.nuevoContrato.contractType || !this.nuevoContrato.owner ) {
-      alert("Faltan datos obligatorios");
+    if (!this.pdfSeleccionado) {
+      alert("Debes adjuntar un archivo PDF antes de crear el contrato.");
       return;
-  }
+    }
   
-    const camposFaltantes = camposRequeridos.filter(
-      (campo) => !this.nuevoContrato[campo] || this.nuevoContrato[campo] === "",
-    )
-    if (camposFaltantes.length > 0) {
-      alert(`Por favor complete los siguientes campos: ${camposFaltantes.join(", ")}`)
-      return
-    }
-    
-
-    if (!this.nuevoContrato.clientName?.trim()) {
-      alert("El campo Nombre del Cliente es obligatorio")
-      return
-    }
-
-    if (!this.nuevoContrato.clientEmail?.trim()) {
-      alert("El campo Email del Cliente es obligatorio")
-      return
-    }
-
-
     const contratoData = {
-      clienteNombre: this.nuevoContrato.clienteNombre.trim(),
-      clienteEmail: this.nuevoContrato.clienteEmail.trim(),
+      clientName: this.nuevoContrato.clientName.trim(),
+      clientEmail: this.nuevoContrato.clientEmail.trim(),
       description: this.nuevoContrato.description,
       startDate: this.nuevoContrato.startDate,
       expirationDate: this.nuevoContrato.expirationDate,
       numeroContrato: this.nuevoContrato.numeroContrato,
       contractType: this.nuevoContrato.contractType,
       owner: this.nuevoContrato.owner,
-      serviceType: this.nuevoContrato.serviceType,
-      archivoPdf: this.nuevoContrato.pdfSeleccionado
-    }
-    formData.append("contratoData", JSON.stringify(contratoData))
-    if (this.pdfSeleccionado) {
-      formData.append("archivoPdf", this.pdfSeleccionado)
-    }
+      serviceType: this.nuevoContrato.serviceType
+    };
+  
+    // Convertir objeto en JSON y enviarlo como campo separado
+    formData.append("contratoData", JSON.stringify(contratoData));
+    formData.append("archivoPdf", this.pdfSeleccionado, this.pdfSeleccionado.name);
+  
+    console.log("📤 Datos que se envían al backend:", formData);
+  
     this.contratoService.crearContrato(formData).subscribe({
       next: (res: any) => {
-        console.log("Contrato creado:", res)
-        alert("Contrato creado exitosamente")
-        this.cargarContratos()
-        this.cerrarModal()
-        this.resetearFormulario()
+        console.log("✅ Contrato creado:", res);
+        alert("Contrato creado exitosamente");
+        this.cargarContratos();
+        this.cerrarModal();
+        this.resetearFormulario();
       },
       error: (error: any) => {
-        console.error("Error completo:", error)
-        let mensajeError = "Error al crear contrato"
-
-        if (error.error) {
-          if (error.error.mensaje) mensajeError += ": " + error.error.mensaje
-          if (error.error.error) mensajeError += "\n" + error.error.error
-        }
-
-        alert(mensajeError)
+        console.error("❌ Error en la petición HTTP:", error);
+        alert("Error al crear contrato: " + (error.error?.mensaje || "Problema desconocido"));
       },
-    })
+    });
   }
 
   resetearFormulario() {

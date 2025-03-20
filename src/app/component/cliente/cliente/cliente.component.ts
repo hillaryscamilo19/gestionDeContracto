@@ -19,9 +19,12 @@ throw new Error('Method not implemented.');
   clientForm: FormGroup
   selectedClient: Client | null = null
   submitting = false
+  mostrarAlerta = false
+  tipoAlerta = "success"
+  mensajeAlerta = ""
   message: { type: string; text: string } | null = null
   apiUrl = "http://localhost:3000/clients"
-loading: any;
+  loading: any;
 
   constructor(
     private fb: FormBuilder,
@@ -123,19 +126,29 @@ loading: any;
     }
   }
 
-  deleteConfirmation(client: Client): void {
-    if (confirm(`¿Estás seguro de que quieres eliminar a ${client.name}?`)) {
-      this.clientService.deleteClient(client._id!).subscribe(
-        () => {
-          this.clients = this.clients.filter((c) => c._id !== client._id)
-          this.showMessage("success", "Cliente eliminado correctamente")
+  eliminarCliente(id: string): void {
+    if (confirm("¿Está seguro de eliminar este contrato?")) {
+      this.clientService.deleteClient(id).subscribe({
+        next: () => {
+          this.clients = this.clients.filter((c) => c._id !== id)
+          this.mostrarMensaje("success", "Contrato eliminado correctamente")
         },
-        (error) => {
-          console.error("Error al eliminar cliente:", error)
-          this.showMessage("danger", "Error al eliminar el cliente")
+        error: (error: any) => {
+          console.error("Error al eliminar contrato:", error)
+          this.mostrarMensaje("danger", "Error al eliminar el contrato")
         },
-      )
+      })
     }
+  }
+
+
+  mostrarMensaje(tipo: string, mensaje: string): void {
+    this.tipoAlerta = tipo
+    this.mensajeAlerta = mensaje
+    this.mostrarAlerta = true
+    setTimeout(() => {
+      this.mostrarAlerta = false
+    }, 5000)
   }
 
   resetForm(): void {
