@@ -158,6 +158,8 @@ export class FormularioContratoComponent implements OnInit {
       }
     });
   }
+
+  
   cargarContratos(): void {
     this.cargando = true
     this.contratoService.getContratos().subscribe({
@@ -244,7 +246,8 @@ export class FormularioContratoComponent implements OnInit {
   }
 
   verContrato(contrato: any): void {
-    this.contratoSeleccionado = contrato
+    const url = `http://localhost:3000/api/uploads/${contrato.archivoPdf._id}`;
+    window.open(url, "_blank");
     console.log("Contrato seleccionado:", this.contratoSeleccionado)
   }
 
@@ -295,7 +298,6 @@ export class FormularioContratoComponent implements OnInit {
         a.download = `contrato-${clientName}.pdf`
         document.body.appendChild(a)
         a.click()
-
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
       },
@@ -349,6 +351,8 @@ export class FormularioContratoComponent implements OnInit {
     const estado = this.getEstadoTexto(contrato)
 
     switch (estado) {
+      case "all":
+        return ""
       case "Vencido":
         return "bg-danger"
       case "Por vencer":

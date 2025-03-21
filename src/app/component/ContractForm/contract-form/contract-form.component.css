@@ -1,17 +1,30 @@
+.header {
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  margin-top: 15px;
+  padding: 15px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.text{
+  color: rgb(12, 127, 180);
+  font-size: 20px;
+}
+
 .container{
     background-color: #ffffff;
+    padding: 3%;
     color: rgb(0, 0, 0);
     margin-top: 15px;
-    padding: 15px 0;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .form-control{
-    width: 40%;
+    width: 100%;
 }
 
 .form-select{
-    width: 99%;
+  width: 94%;
 }
 
 .container-header{

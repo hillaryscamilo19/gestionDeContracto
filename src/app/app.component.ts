@@ -156,7 +156,6 @@ export class AppComponent {
 
         // Actualizar el formulario con los datos del contrato
         this.contratoForm.patchValue({
-          clientId: contrato.clientId || "",
           clientName: contrato.clienteNombre || contrato.clientName,
           clientEmail: contrato.clienteEmail || contrato.clientEmail,
           contractNumber: contrato.numeroContrato || contrato.contractNumber,
@@ -515,25 +514,25 @@ export class AppComponent {
       "expirationDate",
       "numeroContrato",
       "contractType",
-      "owner"
+      "owner",
+      "archivoPdf"
     ]
-    if (!this.pdfSeleccionado) {
-      alert("Debes adjuntar un archivo PDF antes de crear el contrato.");
+    if (!this.nuevoContrato.clientName || !this.pdfSeleccionado) {
+      alert("Faltan datos obligatorios o el PDF");
       return;
     }
-
+  
     const contratoData = {
-      clientName: this.nuevoContrato.clientName.trim(),
-      clientEmail: this.nuevoContrato.clientEmail.trim(),
-      description: this.nuevoContrato.description,
+      clientName: this.nuevoContrato.clientName?.trim(),
+      clientEmail: this.nuevoContrato.clientEmail?.trim(),
+      contractNumber: this.nuevoContrato.numeroContrato, 
+      description: this.nuevoContrato.description || "",
       startDate: this.nuevoContrato.startDate,
       expirationDate: this.nuevoContrato.expirationDate,
-      numeroContrato: this.nuevoContrato.numeroContrato,
       contractType: this.nuevoContrato.contractType,
       owner: this.nuevoContrato.owner,
-      serviceType: this.nuevoContrato.serviceType
+      serviceType: this.nuevoContrato.serviceType || "",
     };
-
     // Convertir objeto en JSON y enviarlo como campo separado
     formData.append("contratoData", JSON.stringify(contratoData));
     formData.append("archivoPdf", this.pdfSeleccionado, this.pdfSeleccionado.name);
@@ -551,7 +550,17 @@ export class AppComponent {
       error: (error: any) => {
         console.error("❌ Error en la petición HTTP:", error);
         alert("Error al crear contrato: " + (error.error?.mensaje || "Problema desconocido"));
+      
+
+        let mensajeError = "Error al crear contrato";
+        if (error.status === 0) {
+          mensajeError += " - No se pudo conectar con el servidor";
+        } else if (error.error) {
+          mensajeError += ` - ${error.error.mensaje || "Error desconocido"}`;
+        }
+        alert(mensajeError);
       },
+      
     });
   }
 

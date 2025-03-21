@@ -19,28 +19,22 @@ export class ContractFormComponent {
   enviando = false
   terminoBusqueda = ""
   clients: any[] = []
-
-  // Variables para manejo de archivos
   archivoSeleccionado: File | null = null
   nombreArchivo = ""
   errorArchivo = ""
-
-  // Variables para alertas
   mostrarAlerta = false
   tipoAlerta = "success"
   mensajeAlerta = ""
-
-  // Referencia al modal
   private modalRef: any
-error: any;
-modoEdicion: any;
-previousContractUrl: any;
+  error: any;
+  modoEdicion: any;
+  previousContractUrl: any;
 
   constructor(
     private fb: FormBuilder,
     private contratoService: ContractoService,
     private clientService: ClienteService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.inicializarFormulario()
@@ -441,15 +435,13 @@ previousContractUrl: any;
     })
   }
 
-
   getClientName(clientId: string): string {
     const client = this.clients.find((c) => c._id === clientId)
     return client ? client.name : "Cliente no encontrado"
   }
 
-
   getContractTypeName(type: string): string {
-    const types:  Record<string, string> = {
+    const types: Record<string, string> = {
       local: "Local",
       internacional: "Internacional",
       aseguradora: "Aseguradora",
@@ -458,7 +450,7 @@ previousContractUrl: any;
   }
 
   getOwnerName(owner: string): string {
-    const owners : Record<string, string> = {
+    const owners: Record<string, string> = {
       ssv: "SSV",
       klarida: "Klarida",
       abrah: "Abrah",

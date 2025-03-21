@@ -37,5 +37,7 @@ export class Client {
   address?: string
   contactPerson?: string
   createdAt?: Date
+  hasActiveContracts: unknown;
+  contractCount!: number;
 }
 

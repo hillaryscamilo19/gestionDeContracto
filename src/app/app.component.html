@@ -8,7 +8,7 @@
           <li><a routerLink="/configuracion" routerLinkActive="active">Configuración</a></li>
           <button class="btn btn-primary boton-Modal absolute top-0 right-0 size-16 " data-bs-toggle="modal"
              data-bs-target="#nuevoContratoModal">
-          <i class="bi bi-file-earmark-plus-fill boton-mpda;"></i>
+             <i class="bi bi-plus-circle"></i>
         </button>
         </ul> 
       </nav>
@@ -35,6 +35,7 @@
           </div>
           <div class="modal-body">
             <form (ngSubmit)="crearContrato()">
+            
               <div class="mb-3">
                 <label for="clientName" class="form-label">Nombre Proveedor</label>
                 <input type="text" id="clientName" name="clientName" class="form-control"
@@ -66,7 +67,6 @@
                   [(ngModel)]="nuevoContrato.numeroContrato" required>
               </div>
 
-
               <div class="mb-3" *ngIf="nuevoContrato.contractType">
                 <label for="numeroContrato" class="form-label">Tipo de contrato</label>
                 <select class="form-select" [(ngModel)]="nuevoContrato.contractType" name="contractType" required>
@@ -76,7 +76,6 @@
                   <option value="aseguradora">Aseguradora</option>
                 </select>                
               </div>
-
 
               <div class="mb-3" *ngIf="nuevoContrato.owner">
                 <label for="owner" class="form-label">Propietario Del contracto</label>
@@ -89,7 +88,6 @@
                 </select>                
               </div>
 
-
               <div class="mb-3">
                 <label for="clienteEmail" class="form-label">Email Empresa</label>
                 <input type="email" id="clienteEmail" name="clienteEmail" class="form-control"
@@ -100,10 +98,19 @@
                 <input type="text" id="clienteNombre" name="clienteNombre" class="form-control"
                   [(ngModel)]="nuevoContrato.clienteNombre" required>
               </div>
-              <div class="mb-3">
-                <label for="pdfFile" class="form-label">Archivo PDF</label>
-                <input type="file" id="pdfFile" name="pdfFile" class="form-control" (change)="onFileSelected($event)" accept="application/pdf"  >
-              </div>
+              <form (ngSubmit)="crearContrato()">
+                <!-- Otros campos del formulario -->
+                <label for="pdfInput">Adjuntar PDF:</label>
+                <input type="file" id="pdfInput" (change)="onFileSelected($event)" accept="application/pdf" />
+              
+                <!-- Vista previa del PDF -->
+                <div *ngIf="pdfSrc">
+                  <h3>Vista previa del PDF:</h3>
+                  <pdf-viewer [src]="pdfSrc" [show-all]="true" [render-text]="true"></pdf-viewer>
+                </div>
+              
+                <button type="submit">Crear Contrato</button>
+              </form>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar Contrato</button>

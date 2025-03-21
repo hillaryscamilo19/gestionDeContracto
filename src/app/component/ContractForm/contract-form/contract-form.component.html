@@ -1,1 +1,68 @@
 
+<div class="header">
+    <div class="container">
+        <div class="row mb-4">
+          <div class="col">
+            <h2 class="text">Contratos</h2>
+          </div>
+        </div>
+      <div class="container-header">
+        <div class="mb-3">
+          <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="Buscar contrato">
+        </div>
+        <div class="mb-3">
+          <select class="form-select" name="contractType" required>
+            <option selected disabled>Seleccionar</option>
+            <option value="local">Locales</option>
+            <option value="internacional">Internacionales</option>
+            <option value="aseguradora">Aseguradora</option>
+          </select>                
+        </div>
+      </div>
+      
+        <div class="alert alert-info">
+          No hay contracto registrados.
+        </div>
+      
+        <div class="tab-content mt-3" id="myTabContent">
+        <div class="tab-pane fade" id="active" role="tabpanel">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Titulo</th>
+                <th>Clinte</th>
+                <th>Tipo</th>
+                <th>Propietario</th>
+                <th>Vencimiento</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr >
+                <td class="text">{{ 'alkal' }}</td>
+                <td>{{ 'daldk' }}</td>
+                <td>{{ 'akdjdkajda' }}</td>
+                <td>{{ 'adjladka'  }}</td>
+                <td>{{ 'adjkladkal'   }}</td>
+                <td>
+                  {{'activo'}}
+                </td>
+                <td>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop" >
+                      <i class="bi bi-eye-fill"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal" >
+                      <i class="bi bi-highlighter"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash-fill"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+</div>

@@ -29,7 +29,6 @@
     "font-awesome-icons": "^1.6.0",
     "jquery": "^3.7.1",
     "ng2-pdf-viewer": "^10.4.0",
-    "ng2-pdfjs-viewer": "^19.0.0",
     "ngx-extended-pdf-viewer": "^23.0.0-alpha.6",
     "ngx-toastr": "^19.0.0",
     "pdfjs-dist": "^5.0.375",

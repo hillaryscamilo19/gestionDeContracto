@@ -4,7 +4,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { PdfJsViewerModule } from 'ng2-pdfjs-viewer';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+
 // Importa todos los componentes
 import { AppComponent } from './app.component';
 import { ListaContratosComponent } from './component/lista-contratos/lista-contratos/lista-contratos.component';
@@ -21,6 +22,7 @@ import { AuthServiceService } from './services/auth/auth-service.service';
 import { ClienteComponent } from './component/cliente/cliente/cliente.component';
 import { ContractFormComponent } from './component/ContractForm/contract-form/contract-form.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { SeachComponent } from './component/seach/seach/seach.component';
 
 
 
@@ -36,6 +38,8 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     ClienteComponent,
     ContractFormComponent,
 
+    SeachComponent,
+
   ],
   imports: [
     BrowserModule,
@@ -43,14 +47,14 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     ReactiveFormsModule,
     HttpClientModule,
     CommonModule,
-    PdfJsViewerModule,
+    PdfViewerModule,
     RouterModule.forRoot([
       { path: '', redirectTo: '/contratos', pathMatch: 'full' },
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegistreComponent },
       { path: 'contratos', component: ListaContratosComponent },
       {path:  'clientes', component: ClienteComponent},
-      { path: 'contrato', component: ContractFormComponent },
+      { path: 'contrato', component: ContractFormComponent},
       { path: 'nuevo-contrato', component: FormularioContratoComponent },
       { path: 'editar-contrato/:id', component: FormularioContratoComponent },
       { path: 'detalle-contrato/:id', component: DetalleContratoComponent },
