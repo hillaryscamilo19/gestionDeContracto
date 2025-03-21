@@ -23,6 +23,9 @@ export class AppComponent {
   clients: any[] = []
   archivoSeleccionado: File | null = null
   nombreArchivo = ""
+  pdfSrc: string | null = null;
+  cargandoPdf: boolean = false;
+  mostrarPdfViewer: boolean = false;
   errorArchivo = ""
   mostrarAlerta = false
   tipoAlerta = "success"
@@ -98,7 +101,7 @@ export class AppComponent {
     this.contratoService.getContratos().subscribe({
       next: (data) => {
         this.contratos = data
-      
+
         this.contratosFiltrados = [...this.contratos]
 
         // Depuración: Mostrar los estados de los contratos
@@ -182,6 +185,50 @@ export class AppComponent {
     })
   }
 
+
+  visualizarPdf(contratoId: string): void {
+    this.cargandoPdf = true;
+    this.mostrarPdfViewer = true;
+    this.contratoSeleccionado = this.contratos.find(c => c._id === contratoId);
+
+    this.contratoService.obtenerUrlPdf(contratoId).subscribe({
+      next: (response: any) => {
+        this.pdfSrc = response.url;
+        this.cargandoPdf = false;
+      },
+      error: (error) => {
+        console.error('Error al obtener el PDF:', error);
+        this.cargandoPdf = false;
+        this.mostrarPdfViewer = false;
+      }
+    });
+  }
+
+  descargarPdf(contratoId: string, nombreCliente: string): void {
+    this.contratoService.descargarPdf(contratoId).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `contrato-${nombreCliente}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      },
+      error: (error) => {
+        console.error('Error al descargar el PDF:', error);
+      }
+    });
+  }
+
+  cerrarVisualizador(): void {
+    this.mostrarPdfViewer = false;
+    this.pdfSrc = null;
+  }
+
+
+
   guardarContrato(): void {
     if (this.contratoForm.invalid) {
       Object.keys(this.contratoForm.controls).forEach((key) => {
@@ -217,7 +264,7 @@ export class AppComponent {
           const index = this.contratos.findIndex((c) => c._id === contratoActualizado._id)
           if (index !== -1) {
             this.contratos[index] = contratoActualizado
-       
+
           }
 
           this.mostrarMensaje("success", "Contrato actualizado correctamente")
@@ -285,7 +332,7 @@ export class AppComponent {
       console.log("Archivo seleccionado:", this.pdfSeleccionado);
     }
   }
-  
+
 
   limpiarArchivo(): void {
     this.archivoSeleccionado = null
@@ -302,29 +349,7 @@ export class AppComponent {
     return contrato.archivoPdf && contrato.archivoPdf.nombre
   }
 
-  descargarPdf(id: string, nombreCliente: string): void {
-    this.contratoService.descargarPdf(id).subscribe({
-      next: (blob) => {
-        // Crear URL del objeto blob
-        const url = window.URL.createObjectURL(blob)
 
-        // Crear elemento <a> para descargar
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `contrato-${nombreCliente}.pdf`
-        document.body.appendChild(a)
-        a.click()
-
-        // Limpiar
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-      },
-      error: (error) => {
-        console.error("Error al descargar PDF:", error)
-        this.mostrarMensaje("danger", "Error al descargar el PDF")
-      },
-    })
-  }
 
   // Métodos para filtrar y clasificar contratos
   filtrarContratos(): void {
@@ -477,6 +502,8 @@ export class AppComponent {
     }
   }
 
+
+
   crearContrato() {
     console.log("Datos a enviar:", this.nuevoContrato)
     const formData = new FormData()
@@ -494,7 +521,7 @@ export class AppComponent {
       alert("Debes adjuntar un archivo PDF antes de crear el contrato.");
       return;
     }
-  
+
     const contratoData = {
       clientName: this.nuevoContrato.clientName.trim(),
       clientEmail: this.nuevoContrato.clientEmail.trim(),
@@ -506,13 +533,13 @@ export class AppComponent {
       owner: this.nuevoContrato.owner,
       serviceType: this.nuevoContrato.serviceType
     };
-  
+
     // Convertir objeto en JSON y enviarlo como campo separado
     formData.append("contratoData", JSON.stringify(contratoData));
     formData.append("archivoPdf", this.pdfSeleccionado, this.pdfSeleccionado.name);
-  
+
     console.log("📤 Datos que se envían al backend:", formData);
-  
+
     this.contratoService.crearContrato(formData).subscribe({
       next: (res: any) => {
         console.log("✅ Contrato creado:", res);

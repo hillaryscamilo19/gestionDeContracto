@@ -17,10 +17,14 @@ export class FormularioContratoComponent implements OnInit {
   contratoSeleccionado: any = null
   pdfSeleccionado: File | null = null;
   contratoForm!: FormGroup;
+
   enviando = false
   terminoBusqueda = ""
   archivoSeleccionado: File | null = null
   nombreArchivo = ""
+  pdfSrc: string | null = null;
+  cargandoPdf: boolean = false;
+  mostrarPdfViewer: boolean = false;
   errorArchivo = ""
   mostrarAlerta = false
   tipoAlerta = "success"
@@ -132,6 +136,28 @@ export class FormularioContratoComponent implements OnInit {
     })
   }
 
+
+  cerrarVisualizador(): void {
+    this.mostrarPdfViewer = false;
+    this.pdfSrc = null;
+  }
+  visualizarPdf(contratoId: string): void {
+    this.cargandoPdf = true;
+    this.mostrarPdfViewer = true;
+    this.contratoSeleccionado = this.contratos.find(c => c._id === contratoId);
+
+    this.contratoService.obtenerUrlPdf(contratoId).subscribe({
+      next: (response: any) => {
+        this.pdfSrc = response.url;
+        this.cargandoPdf = false;
+      },
+      error: (error) => {
+        console.error('Error al obtener el PDF:', error);
+        this.cargandoPdf = false;
+        this.mostrarPdfViewer = false;
+      }
+    });
+  }
   cargarContratos(): void {
     this.cargando = true
     this.contratoService.getContratos().subscribe({
@@ -225,7 +251,7 @@ export class FormularioContratoComponent implements OnInit {
   onFileSelected(event: any): void {
     const file = event.target.files[0]
     if (file) {
- 
+
       if (file.type !== "application/pdf") {
         this.errorArchivo = "Solo se permiten archivos PDF"
         this.archivoSeleccionado = null

@@ -37,17 +37,28 @@
           <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
           <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
           <td>
-            <div>
-              <span class="badge rounded-pill bg-success">Activo</span>
+            <span class="badge rounded-pill" [ngClass]="getEstadoClase(contrato)">
+              {{ getEstadoTexto(contrato) }}
+            </span>
+          </td>
+          <td>
+            <div *ngIf="tienePdf(contrato)" class="d-flex align-items-center">
+              <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+              <button class="btn btn-sm btn-outline-primary me-1" (click)="visualizarPdf(contrato._id)">
+                <i class="bi bi-eye"></i> Ver
+              </button>
+              <button class="btn btn-sm btn-outline-success" (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
+                <i class="bi bi-download"></i> Descargar
+              </button>
             </div>
+            <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin documento</span>
           </td>
           <td>
             <div class="btn-group">
-              <button  type="button" class="btn btn-sm btn-outline-info " data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="verContrato(contrato)">
+              <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="verContrato(contrato)">
                 <i class="bi bi-eye-fill"></i>
               </button>
-              <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
-                (click)="editarContrato(contrato._id)">
+              <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal" (click)="editarContrato(contrato._id)">
                 <i class="bi bi-highlighter"></i>
               </button>
               <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
@@ -80,17 +91,28 @@
           <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
           <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
           <td>
-            <div>
-              <span class="badge rounded-pill bg-warning text-dark">Por vencer</span>
+            <span class="badge rounded-pill" [ngClass]="getEstadoClase(contrato)">
+              {{ getEstadoTexto(contrato) }}
+            </span>
+          </td>
+          <td>
+            <div *ngIf="tienePdf(contrato)" class="d-flex align-items-center">
+              <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+              <button class="btn btn-sm btn-outline-primary me-1" (click)="visualizarPdf(contrato._id)">
+                <i class="bi bi-eye"></i> Ver
+              </button>
+              <button class="btn btn-sm btn-outline-success" (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
+                <i class="bi bi-download"></i> Descargar
+              </button>
             </div>
+            <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin documento</span>
           </td>
           <td>
             <div class="btn-group">
-              <button  type="button" class="btn btn-sm btn-outline-info " data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="verContrato(contrato)">
+              <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="verContrato(contrato)">
                 <i class="bi bi-eye-fill"></i>
               </button>
-              <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
-                (click)="editarContrato(contrato._id)">
+              <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal" (click)="editarContrato(contrato._id)">
                 <i class="bi bi-highlighter"></i>
               </button>
               <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
@@ -123,30 +145,80 @@
           <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
           <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
           <td>
-          <div>
-            <span class="badge rounded-pill bg-danger">Vencido</span>
-          </div>
-        </td>
-
-          <td>
-            <div class="btn-group">
-              <button  type="button" class="btn btn-sm btn-outline-info " data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="verContrato(contrato)">
-                <i class="bi bi-eye-fill"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
-                (click)="editarContrato(contrato._id)">
-                <i class="bi bi-highlighter"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
-                <i class="bi bi-trash-fill"></i>
-              </button>
-            </div>
+            <td>
+              <span class="badge rounded-pill" [ngClass]="getEstadoClase(contrato)">
+                {{ getEstadoTexto(contrato) }}
+              </span>
+            </td>
+            <td>
+              <div *ngIf="tienePdf(contrato)" class="d-flex align-items-center">
+                <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                <button class="btn btn-sm btn-outline-primary me-1" (click)="visualizarPdf(contrato._id)">
+                  <i class="bi bi-eye"></i> Ver
+                </button>
+                <button class="btn btn-sm btn-outline-success" (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
+                  <i class="bi bi-download"></i> Descargar
+                </button>
+              </div>
+              <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin documento</span>
+            </td>
+            <td>
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="verContrato(contrato)">
+                  <i class="bi bi-eye-fill"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal" (click)="editarContrato(contrato._id)">
+                  <i class="bi bi-highlighter"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </div>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
+  <!-- Modal para visualizar PDF -->
+<div class="modal fade" id="pdfViewerModal" tabindex="-1" aria-labelledby="pdfViewerModalLabel" aria-hidden="true" [ngClass]="{'show': mostrarPdfViewer}" [ngStyle]="{'display': mostrarPdfViewer ? 'block' : 'none'}">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pdfViewerModalLabel">
+          {{ contratoSeleccionado ? 'Contrato: ' + contratoSeleccionado.clienteNombre : 'Visualizador de PDF' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="cerrarVisualizador()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="cargandoPdf" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="mt-2">Cargando documento...</p>
+        </div>
+
+        <div *ngIf="!cargandoPdf && pdfSrc" style="height: 70vh;">
+          <ng2-pdfjs-viewer
+          #pdfViewer
+          [viewerId]="'pdf-viewer'"
+          [downloadFileName]="'contrato.pdf'"
+          [openFile]="false"
+          [viewBookmark]="false"
+          [download]="true"
+          style="width: 100%; height: 70vh;">
+        </ng2-pdfjs-viewer>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarVisualizador()">Cerrar</button>
+        <button *ngIf="contratoSeleccionado" type="button" class="btn btn-primary" (click)="descargarPdf(contratoSeleccionado._id, contratoSeleccionado.clienteNombre)">
+          <i class="bi bi-download"></i> Descargar PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 <!--Modal para crear y editar-->
 <div class="modal fade" id="contratoModal" tabindex="-1" aria-labelledby="nuevoContratoModalLabel"
 aria-hidden="true">
@@ -245,7 +317,7 @@ aria-hidden="true">
               <p>{{ contratoSeleccionado.numeroContrato || 'No especificado' }}</p>
             </div>
           </div>
-          
+
           <div class="row mb-3">
             <div class="col-md-6">
               <h6 class="fw-bold">Correo Electrónico</h6>
@@ -256,15 +328,15 @@ aria-hidden="true">
               <p>{{ contratoSeleccionado.fechaVencimiento | date:'dd/MM/yyyy' }}</p>
             </div>
           </div>
-          
+
           <div class="row mb-3">
             <div class="col-md-6">
               <h6 class="fw-bold">Fecha de Inicio</h6>
               <p>{{ contratoSeleccionado.fechaInicio | date:'dd/MM/yyyy' }}</p>
             </div>
-         
+
           </div>
-          
+
           <div class="row">
             <div class="col-12">
               <h6 class="fw-bold">Descripción</h6>
@@ -285,7 +357,7 @@ aria-hidden="true">
             </div>
           </div>
         </div>
-        
+
         <div *ngIf="!contratoSeleccionado" class="text-center py-4">
           <i class="bi bi-exclamation-circle text-warning" style="font-size: 2rem;"></i>
           <p class="mt-2">No se ha seleccionado ningún contrato o ha ocurrido un error.</p>

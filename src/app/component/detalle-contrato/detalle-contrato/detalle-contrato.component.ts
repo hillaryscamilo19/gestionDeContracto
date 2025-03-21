@@ -286,7 +286,7 @@ archivoSeleccionado: File | null = null
   }
 
 
-  
+
   filtrarPorEstado(estado: string): any[] {
     return this.contratos.filter((contrato) => this.getEstadoTexto(contrato) === estado)
   }

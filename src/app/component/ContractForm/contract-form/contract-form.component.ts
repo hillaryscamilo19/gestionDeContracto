@@ -92,7 +92,7 @@ previousContractUrl: any;
     this.contratoService.getContratos().subscribe({
       next: (data) => {
         this.contratos = data
-   
+
         this.contratosFiltrados = [...this.contratos]
         this.contratos.forEach((contrato) => {
           console.log(
@@ -112,7 +112,7 @@ previousContractUrl: any;
       },
     })
   }
-  
+
   onClientChange(event: any): void {
     const clientId = event.target.value
     if (clientId) {
@@ -206,7 +206,7 @@ previousContractUrl: any;
           const index = this.contratos.findIndex((c) => c._id === contratoActualizado._id)
           if (index !== -1) {
             this.contratos[index] = contratoActualizado
-        
+
           }
 
           this.mostrarMensaje("success", "Contrato actualizado correctamente")
@@ -226,7 +226,7 @@ previousContractUrl: any;
       this.contratoService.crearContrato(formData).subscribe({
         next: (nuevoContrato) => {
           this.contratos.push(nuevoContrato)
-    
+
           this.mostrarMensaje("success", "Contrato creado correctamente")
           this.cerrarModal()
           this.enviando = false
@@ -328,7 +328,7 @@ previousContractUrl: any;
     })
   }
 
-  
+
   filtrarContratos(): void {
     if (!this.terminoBusqueda.trim()) {
       this.contratosFiltrados = [...this.contratos]
@@ -441,7 +441,7 @@ previousContractUrl: any;
     })
   }
 
-  
+
   getClientName(clientId: string): string {
     const client = this.clients.find((c) => c._id === clientId)
     return client ? client.name : "Cliente no encontrado"

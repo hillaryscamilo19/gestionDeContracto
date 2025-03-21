@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
+import { PdfJsViewerModule } from 'ng2-pdfjs-viewer';
 // Importa todos los componentes
 import { AppComponent } from './app.component';
 import { ListaContratosComponent } from './component/lista-contratos/lista-contratos/lista-contratos.component';
@@ -43,6 +43,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     ReactiveFormsModule,
     HttpClientModule,
     CommonModule,
+    PdfJsViewerModule,
     RouterModule.forRoot([
       { path: '', redirectTo: '/contratos', pathMatch: 'full' },
       { path: 'login', component: LoginComponent },

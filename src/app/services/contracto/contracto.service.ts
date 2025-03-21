@@ -13,9 +13,9 @@ constructor(private http: HttpClient) {}
 
 getContratos(): Observable<any[]> {
   console.log("Obteniendo contratos desde:", this.apiUrl)
-  
+
   return this.http.get<any[]>(this.apiUrl).pipe(
-    
+
     tap((contratos) => console.log("Contratos recibidos:", contratos.length)),
     catchError((error) => {
       console.error("Error al obtener contratos:", error)
@@ -68,16 +68,14 @@ eliminarContrato(id: string): Observable<any> {
   )
 }
 
+
 descargarPdf(id: string): Observable<Blob> {
-  return this.http
-    .get(`${this.apiUrl}/${id}/pdf`, {
-      responseType: "blob",
-    })
-    .pipe(
-      catchError((error) => {
-        console.error(`Error al descargar PDF del contrato ${id}:`, error)
-        return throwError(() => error)
-      }),
-    )
+  return this.http.get(`${this.apiUrl}/${id}/pdf`, {
+    responseType: 'blob'
+  });
+}
+
+obtenerUrlPdf(id: string): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/${id}/pdf-url`);
 }
 }
