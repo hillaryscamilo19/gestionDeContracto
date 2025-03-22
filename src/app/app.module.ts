@@ -22,7 +22,7 @@ import { AuthServiceService } from './services/auth/auth-service.service';
 import { ClienteComponent } from './component/cliente/cliente/cliente.component';
 import { ContractFormComponent } from './component/ContractForm/contract-form/contract-form.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
-import { SeachComponent } from './component/seach/seach/seach.component';
+import { PdfViewerModalComponent } from './component/ContractForm/contract-form/pdf-viewer-modal/pdf-viewer-modal/pdf-viewer-modal.component';
 
 
 
@@ -37,8 +37,7 @@ import { SeachComponent } from './component/seach/seach/seach.component';
     RegistreComponent,
     ClienteComponent,
     ContractFormComponent,
-
-    SeachComponent,
+    PdfViewerModalComponent
 
   ],
   imports: [

@@ -3,6 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ContractoService } from '../../../services/contracto/contracto.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ClienteService } from 'src/app/services/Cliente/cliente.service';
 
 @Component({
   selector: 'app-lista-contratos',
@@ -13,6 +14,10 @@ export class ListaContratosComponent implements OnInit {
   @Input() contratos: any[] = [];
   @Input() cargando: boolean = false;
   filteredContratos: any[] = [];
+  allClients: any[] = [];
+  searchTerm: string = '';
+  filterType: string = 'all';
+  filteredClients: any[] = [];
   loading: boolean = true;
   filterForm: FormGroup;
   
@@ -34,6 +39,7 @@ export class ListaContratosComponent implements OnInit {
 
   constructor(
     private contratoService: ContractoService,
+        private clientService: ClienteService,
     private fb: FormBuilder
   ) {
     this.filterForm = this.fb.group({
@@ -45,7 +51,7 @@ export class ListaContratosComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadContratos();
-    
+    this.loadClients()
     // Aplicar filtros cuando cambian los valores del formulario
     this.filterForm.get('searchTerm')?.valueChanges
       .pipe(
@@ -57,7 +63,21 @@ export class ListaContratosComponent implements OnInit {
     this.filterForm.get('filterType')?.valueChanges.subscribe(() => this.filterContratos());
     this.filterForm.get('sortBy')?.valueChanges.subscribe(() => this.filterContratos());
   }
-
+  
+  loadClients(): void {
+    this.loading = true;
+    this.clientService.getClients().subscribe({
+      next: (data) => {
+        this.allClients = data;
+        this.applyFilters(); 
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar clientes:', error);
+        this.loading = false;
+      }
+    });
+  }
   loadContratos(): void {
     this.loading = true;
     this.contratoService.getContratos().subscribe({
@@ -112,6 +132,41 @@ export class ListaContratosComponent implements OnInit {
     
     this.filteredContratos = filtered;
   }
+
+  applyFilters(): void {
+    // Filtrar por término de búsqueda
+    let result = this.allClients;
+    
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      result = result.filter(client => 
+        (client.name || '').toLowerCase().includes(term) ||
+        (client.email || '').toLowerCase().includes(term) ||
+        (client.phone || '').toLowerCase().includes(term)
+      );
+    }
+    
+    // Filtrar por tipo
+    if (this.filterType !== 'all') {
+      if (this.filterType === 'active') {
+        result = result.filter(client => client.hasActiveContracts);
+      } else if (this.filterType === 'inactive') {
+        result = result.filter(client => !client.hasActiveContracts);
+      } else if (this.filterType === 'recent') {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        result = result.filter(client => {
+          if (!client.createdAt) return false;
+          const createdAt = new Date(client.createdAt);
+          return createdAt >= thirtyDaysAgo;
+        });
+      }
+    }
+    
+    this.filteredClients = result;
+  }
+  
 
   filtrarPorEstado(estado: string): any[] {
     if (!this.contratos) {

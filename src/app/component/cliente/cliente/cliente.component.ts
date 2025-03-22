@@ -4,6 +4,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { throwError } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
 import { Client } from 'src/app/models/contract/contract.module';
+
 import { ClienteService } from 'src/app/services/Cliente/cliente.service';
 
 @Component({
@@ -97,7 +98,6 @@ export class ClienteComponent {
     
     this.filteredClients = result;
   }
-  
 
     filterOptions = [
       { value: 'all', label: 'Todos los clientes' },

@@ -106,12 +106,6 @@ export class AppComponent {
 
         // Depuración: Mostrar los estados de los contratos
         this.contratos.forEach((contrato) => {
-          console.log(
-            "Contrato:",
-            contrato.clienteNombre || contrato.clientName,
-            "Estado:",
-            this.getEstadoTexto(contrato),
-          )
         })
 
         this.cargando = false
@@ -387,15 +381,6 @@ export class AppComponent {
       // Calcular días restantes
       const diasRestantes = Math.ceil((fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
 
-      console.log(
-        "Contrato:",
-        contrato.clienteNombre || contrato.clientName,
-        "Fecha vencimiento:",
-        fechaVencimiento.toISOString().split("T")[0],
-        "Días restantes:",
-        diasRestantes,
-      )
-
       if (diasRestantes < 0) {
         return "Vencido"
       } else if (diasRestantes <= 30) {
@@ -450,19 +435,8 @@ export class AppComponent {
 
   // Añadir un método para depurar todos los contratos
   depurarContratos(): void {
-    console.log("===== DEPURACIÓN DE CONTRATOS =====")
-    console.log("Total de contratos:", this.contratos.length)
-    console.log("Activos:", this.filtrarPorEstado("Activo").length)
-    console.log("Por vencer:", this.filtrarPorEstado("Por vencer").length)
-    console.log("Vencidos:", this.filtrarPorEstado("Vencido").length)
-
+   
     this.contratos.forEach((contrato, index) => {
-      console.log(
-        `Contrato #${index + 1}:`,
-        contrato.clienteNombre || contrato.clientName,
-        "Estado:",
-        this.getEstadoTexto(contrato),
-      )
     })
   }
 

@@ -28,6 +28,22 @@ export class ContractModule {
   clientId?: string
 }
 
+
+
+export class Cliente2{
+        _id?: string
+        nombre!: string
+        apellido!:string
+        email!: string
+        createAt!: Date
+        isActive!: true
+        direccion!: string
+        contactPerson?: string
+        telefono?: string
+        documento_Identidad!: string
+}
+
+
 export class Client {
   _id?: string
   name!: string

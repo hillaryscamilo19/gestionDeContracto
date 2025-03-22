@@ -33,3 +33,36 @@
     justify-content: space-between;
     align-items: center;
 }
+
+/* contratos.component.css */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.badge {
+  font-size: 0.85em;
+  padding: 0.35em 0.65em;
+}
+
+.btn-group .btn {
+  padding: 0.25rem 0.5rem;
+}
+
+.container-header {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+/* Estilos para dispositivos móviles */
+@media (max-width: 768px) {
+  .table th, .table td {
+    white-space: nowrap;
+  }
+  
+  .btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+  }
+}

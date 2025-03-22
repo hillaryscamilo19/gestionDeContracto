@@ -4,6 +4,10 @@ import { Modal } from 'bootstrap';
 
 import { ClienteService } from 'src/app/services/Cliente/cliente.service';
 import { ContractoService } from 'src/app/services/contracto/contracto.service';
+import { ViewChild } from '@angular/core';
+import { PdfViewerModalComponent } from './pdf-viewer-modal/pdf-viewer-modal/pdf-viewer-modal.component';
+import * as bootstrap from 'bootstrap';
+import modal from 'bootstrap/js/dist/modal';
 
 @Component({
   selector: 'app-contract-form',
@@ -12,16 +16,25 @@ import { ContractoService } from 'src/app/services/contracto/contracto.service';
 })
 export class ContractFormComponent {
   @Input() contratos: any[] = [];
+  @ViewChild(PdfViewerModalComponent) pdfViewer!: PdfViewerModalComponent;
   contratosFiltrados: any[] = []
   contratoSeleccionado: any = null
   contratoForm!: FormGroup
+  cargandoPdf: boolean = false;
+  contratosFiltered: any[] = [];
+  mostrarPdfViewer: boolean = false;
   cargando = false
+  pdfSrc: string | null = null;
+  clientes: any[] = [];
   enviando = false
-  terminoBusqueda = ""
+  filtroCliente: string = '';
+  filtroEstado: string = '';
+  terminoBusqueda: string = '';
   clients: any[] = []
   archivoSeleccionado: File | null = null
   nombreArchivo = ""
   errorArchivo = ""
+  loading: any;
   mostrarAlerta = false
   tipoAlerta = "success"
   mensajeAlerta = ""
@@ -29,6 +42,7 @@ export class ContractFormComponent {
   error: any;
   modoEdicion: any;
   previousContractUrl: any;
+  modalInstance!: Modal;
 
   constructor(
     private fb: FormBuilder,
@@ -72,39 +86,49 @@ export class ContractFormComponent {
   cargarClientes(): void {
     this.clientService.getClients().subscribe({
       next: (data) => {
-        this.clients = data
+        this.clientes = data;
       },
       error: (error) => {
-        console.error("Error al cargar clientes:", error)
-        this.mostrarMensaje("danger", "Error al cargar los clientes")
-      },
-    })
+        console.error('Error al cargar clientes:', error);
+      }
+    });
+  }
+  
+  aplicarFiltros(): void {
+    let resultado = [...this.contratos];
+    
+    // Filtrar por cliente
+    if (this.filtroCliente) {
+      resultado = resultado.filter(contrato => contrato.clienteId === this.filtroCliente);
+    }
+    
+    // Filtrar por estado
+    if (this.filtroEstado) {
+      resultado = resultado.filter(contrato => this.getEstadoTexto(contrato) === this.filtroEstado);
+    }
+    
+    // Filtrar por término de búsqueda
+    if (this.terminoBusqueda) {
+      const termino = this.terminoBusqueda.toLowerCase();
+      resultado = resultado.filter(contrato => 
+        (contrato.clienteNombre || '').toLowerCase().includes(termino) ||
+        (contrato.description || '').toLowerCase().includes(termino)
+      );
+    }
+    
+    this.contratosFiltered = resultado;
   }
 
   cargarContratos(): void {
-    this.cargando = true
     this.contratoService.getContratos().subscribe({
       next: (data) => {
-        this.contratos = data
-
-        this.contratosFiltrados = [...this.contratos]
-        this.contratos.forEach((contrato) => {
-          console.log(
-            "Contrato:",
-            contrato.clienteNombre || contrato.clientName,
-            "Estado:",
-            this.getEstadoTexto(contrato),
-          )
-        })
-
-        this.cargando = false
+        this.contratos = data;
+        this.aplicarFiltros();
       },
       error: (error) => {
-        console.error("Error al cargar contratos:", error)
-        this.mostrarMensaje("error", "Error al cargar los contratos")
-        this.cargando = false
-      },
-    })
+        console.error('Error al cargar contratos:', error);
+      }
+    });
   }
 
   onClientChange(event: any): void {
@@ -118,6 +142,38 @@ export class ContractFormComponent {
         })
       }
     }
+  }
+
+  visualizarPdf(id: string): void {
+    const contrato = this.contratos.find(c => c._id === id);
+    if (!contrato) return;
+    
+    this.contratoService.obtenerUrlPdf(id).subscribe({
+      next: (response) => {
+        this.pdfViewer.pdfSrc = response.url;
+        this.pdfViewer.titulo = `Contrato: ${contrato.clienteNombre}`;
+        this.pdfViewer.contratoId = id;
+        this.pdfViewer.clienteNombre = contrato.clienteNombre;
+        
+        // Abrir el modal usando la instancia guardada
+        if (this.modalInstance) {
+          this.modalInstance.show();
+        } else {
+          // Si por alguna razón no se inicializó, intentar nuevamente
+          const modalElement = document.getElementById('pdfViewerModal');
+          if (modalElement) {
+            this.modalInstance = new bootstrap.Modal(modalElement);
+            this.modalInstance.show();
+          } else {
+            console.error('No se pudo encontrar el elemento del modal');
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Error al obtener URL del PDF:', error);
+        // Mostrar mensaje de error
+      }
+    });
   }
 
   abrirFormulario(): void {
@@ -341,6 +397,13 @@ export class ContractFormComponent {
     )
   }
 
+  limpiarFiltros(): void {
+    this.filtroCliente = '';
+    this.filtroEstado = '';
+    this.terminoBusqueda = '';
+    this.aplicarFiltros();
+  }
+
   getEstadoTexto(contrato: any): string {
     try {
       const hoy = new Date()
@@ -357,14 +420,6 @@ export class ContractFormComponent {
       // Calcular días restantes
       const diasRestantes = Math.ceil((fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
 
-      console.log(
-        "Contrato:",
-        contrato.clienteNombre || contrato.clientName,
-        "Fecha vencimiento:",
-        fechaVencimiento.toISOString().split("T")[0],
-        "Días restantes:",
-        diasRestantes,
-      )
 
       if (diasRestantes < 0) {
         return "Vencido"
@@ -419,19 +474,7 @@ export class ContractFormComponent {
 
   // Añadir un método para depurar todos los contratos
   depurarContratos(): void {
-    console.log("===== DEPURACIÓN DE CONTRATOS =====")
-    console.log("Total de contratos:", this.contratos.length)
-    console.log("Activos:", this.filtrarPorEstado("Activo").length)
-    console.log("Por vencer:", this.filtrarPorEstado("Por vencer").length)
-    console.log("Vencidos:", this.filtrarPorEstado("Vencido").length)
-
     this.contratos.forEach((contrato, index) => {
-      console.log(
-        `Contrato #${index + 1}:`,
-        contrato.clienteNombre || contrato.clientName,
-        "Estado:",
-        this.getEstadoTexto(contrato),
-      )
     })
   }
 

@@ -32,13 +32,6 @@
             </select>
           </div>
 
-          <div class="col-md-3">
-            <select class="form-select" [(ngModel)]="sortBy">
-              <option *ngFor="let option of sortOptions" [value]="option.value">
-                {{ option.label }}
-              </option>
-            </select>
-          </div>
 
           <div class="col-md-2">
             <button type="button" class="btn btn-outline-secondary w-100" (click)="resetFilters()">
@@ -48,13 +41,6 @@
         </div>
       </div>
     </div>
-
-    <h5 class="card-title">
-      Clientes
-      <span class="badge bg-primary">
-        {{ filteredClients.length }}
-      </span>
-    </h5>
 
     <div *ngIf="loading" class="text-center py-4">
       <div class="spinner-border text-primary" role="status">

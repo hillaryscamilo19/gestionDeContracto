@@ -1,68 +1,111 @@
-
 <div class="header">
-    <div class="container">
-        <div class="row mb-4">
-          <div class="col">
-            <h2 class="text">Contratos</h2>
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col">
+        <h2 class="text">Contratos</h2>
+      </div>
+    </div>
+    
+    <div class="container-header">
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <select class="form-select" [(ngModel)]="filtroCliente" (change)="aplicarFiltros()">
+            <option value="">Todos los clientes</option>
+            <option *ngFor="let cliente of clientes" [value]="cliente._id">{{ cliente.nombre }}</option>
+          </select>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+          <select class="form-select" [(ngModel)]="filtroEstado" (change)="aplicarFiltros()">
+            <option value="">Todos los estados</option>
+            <option value="Activo">Activos</option>
+            <option value="Vence pronto">Vencimiento próximo</option>
+            <option value="Vencido">Vencidos</option>
+          </select>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Buscar..." [(ngModel)]="terminoBusqueda" (input)="aplicarFiltros()">
+            <button class="btn btn-outline-secondary" type="button" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle"></i>
+            </button>
           </div>
         </div>
-      <div class="container-header">
-        <div class="mb-3">
-          <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="Buscar contrato">
-        </div>
-        <div class="mb-3">
-          <select class="form-select" name="contractType" required>
-            <option selected disabled>Seleccionar</option>
-            <option value="local">Locales</option>
-            <option value="internacional">Internacionales</option>
-            <option value="aseguradora">Aseguradora</option>
-          </select>                
-        </div>
       </div>
-      
-        <div class="alert alert-info">
-          No hay contracto registrados.
-        </div>
-      
-        <div class="tab-content mt-3" id="myTabContent">
-        <div class="tab-pane fade" id="active" role="tabpanel">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>Titulo</th>
-                <th>Clinte</th>
-                <th>Tipo</th>
-                <th>Propietario</th>
-                <th>Vencimiento</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr >
-                <td class="text">{{ 'alkal' }}</td>
-                <td>{{ 'daldk' }}</td>
-                <td>{{ 'akdjdkajda' }}</td>
-                <td>{{ 'adjladka'  }}</td>
-                <td>{{ 'adjkladkal'   }}</td>
-                <td>
-                  {{'activo'}}
-                </td>
-                <td>
-                  <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop" >
-                      <i class="bi bi-eye-fill"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal" >
-                      <i class="bi bi-highlighter"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger">
-                      <i class="bi bi-trash-fill"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    </div>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab" aria-controls="active" aria-selected="true">Contratos</button>
+  </li>
+</ul>
+<div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="active-tab">
+
+</div>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Descripción</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Vencimiento</th>
+            <th>Estado</th>
+            <th>Documento</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contrato of contratosFiltered">
+            <td>{{ contrato.clienteNombre }}</td>
+            <td>{{ contrato.description }}</td>
+            <td>{{ contrato.fechaInicio | date:'dd/MM/yyyy' }}</td>
+            <td>{{ contrato.fechaVencimiento | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <span class="badge rounded-pill" [ngClass]="getEstadoClase(contrato)">
+                {{ getEstadoTexto(contrato) }}
+              </span>
+            </td>
+            <td>
+              <div *ngIf="tienePdf(contrato)" class="d-flex align-items-center">
+                <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                <button class="btn btn-sm btn-outline-primary me-1" (click)="visualizarPdf(contrato._id)">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-success" (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
+                  <i class="bi bi-download"></i>
+                </button>
+              </div>
+              <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin documento</span>
+            </td>
+            <td>
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal"
+                  data-bs-target="#staticBackdrop" (click)="verContrato(contrato)">
+                  <i class="bi bi-eye-fill"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
+                  (click)="editarContrato(contrato._id)">
+                  <i class="bi bi-highlighter"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          
+          <!-- Mensaje cuando no hay contratos -->
+          <tr *ngIf="contratosFiltered.length === 0">
+            <td colspan="7" class="text-center py-3">
+              <p class="mb-0">No se encontraron contratos con los filtros aplicados</p>
+              <button class="btn btn-sm btn-outline-primary mt-2" (click)="limpiarFiltros()">
+                Ver todos los contratos
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

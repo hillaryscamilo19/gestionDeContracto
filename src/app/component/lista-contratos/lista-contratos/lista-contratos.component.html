@@ -1,7 +1,7 @@
 <div class="cards-container">
   <div class="card">
     <span class="card-title">Total de Cliente</span>
-    <span class="card-number">2</span>
+    <span class="card-number"> {{ filteredClients.length }}</span>
     <Button variant="ghost" size="sm" 
     data-bs-toggle="modal" 
     data-bs-target="#clientModal"  routerLink="/clientes" routerLinkActive="active">
@@ -9,10 +9,8 @@
     </Button>
   </div>
   <div class="card">
-    <span class="card-title">Total de Contractos</span>
-    <span class="card-number">{{ filtrarPorEstado('Activo').length }}</span>
-    <button variant="ghost" size="sm" data-bs-toggle="modal"
-    data-bs-target="#nuevoContratoModal"> Nuevo Contrato</button>
+    <span class="card-title">Total de Contrato</span>
+    <span class="card-number">{{ filtrarPorEstado('all').length }}</span>
   </div>
   <div class="card">
     <span class="card-title">Contracto</span>

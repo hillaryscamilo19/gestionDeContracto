@@ -12,8 +12,6 @@ constructor(private http: HttpClient) {}
 
 
 getContratos(): Observable<any[]> {
-  console.log("Obteniendo contratos desde:", this.apiUrl)
-
   return this.http.get<any[]>(this.apiUrl).pipe(
 
     tap((contratos) => console.log("Contratos recibidos:", contratos.length)),
@@ -35,7 +33,6 @@ getContrato(id: string): Observable<any> {
 
 
 crearContrato(formData: FormData): Observable<any> {
-  console.log("Enviando datos al servidor:", formData)
   return this.http.post(this.apiUrl, formData).pipe(
     catchError((error) => {
       console.error("Error en el servicio:", error)
