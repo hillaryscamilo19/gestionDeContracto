@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 // Importa todos los componentes
 import { AppComponent } from './app.component';
@@ -18,6 +19,11 @@ import { ConfiguracionService } from './services/configuracion/configuracion.ser
 import { LoginComponent } from './component/User/login/login/login.component';
 import { RegistreComponent } from './component/User/Registre/registre/registre.component';
 import { AuthServiceService } from './services/auth/auth-service.service';
+import { ClienteComponent } from './component/cliente/cliente/cliente.component';
+import { ContractFormComponent } from './component/ContractForm/contract-form/contract-form.component';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { PdfViewerModalComponent } from './component/ContractForm/contract-form/pdf-viewer-modal/pdf-viewer-modal/pdf-viewer-modal.component';
+
 
 
 @NgModule({
@@ -29,6 +35,9 @@ import { AuthServiceService } from './services/auth/auth-service.service';
     ConfiguracionNotificacionesComponent,
     LoginComponent,
     RegistreComponent,
+    ClienteComponent,
+    ContractFormComponent,
+    PdfViewerModalComponent
 
   ],
   imports: [
@@ -37,21 +46,26 @@ import { AuthServiceService } from './services/auth/auth-service.service';
     ReactiveFormsModule,
     HttpClientModule,
     CommonModule,
+    PdfViewerModule,
     RouterModule.forRoot([
-      { path: '', redirectTo: '/login', pathMatch: 'full' },
+      { path: '', redirectTo: '/contratos', pathMatch: 'full' },
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegistreComponent },
       { path: 'contratos', component: ListaContratosComponent },
+      {path:  'clientes', component: ClienteComponent},
+      { path: 'contrato', component: ContractFormComponent},
       { path: 'nuevo-contrato', component: FormularioContratoComponent },
       { path: 'editar-contrato/:id', component: FormularioContratoComponent },
       { path: 'detalle-contrato/:id', component: DetalleContratoComponent },
-      { path: 'configuracion', component: ConfiguracionNotificacionesComponent }
+      { path: 'configuracion', component: ConfiguracionNotificacionesComponent },
+      { path: "**", redirectTo: "/contratos" }
     ])
   ],
   providers: [
     ContractoService,
     AuthServiceService,
-    ConfiguracionService
+    ConfiguracionService,
+    [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   ],
   bootstrap: [AppComponent]
 })

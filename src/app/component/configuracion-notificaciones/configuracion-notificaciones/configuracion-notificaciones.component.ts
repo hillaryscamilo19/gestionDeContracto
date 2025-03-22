@@ -25,7 +25,6 @@ export class ConfiguracionNotificacionesComponent implements OnInit {
     }
 
     testEmailAddress = ""
-
     cargando = true
     guardando = false
     enviandoPrueba = false
@@ -65,7 +64,6 @@ export class ConfiguracionNotificacionesComponent implements OnInit {
     validarFormulario(): boolean {
       this.errors = {}
       let isValid = true
-
       // Validar email remitente
       if (!this.configuracion.emailRemitente) {
         this.errors["emailRemitente"] = "El email remitente es requerido"

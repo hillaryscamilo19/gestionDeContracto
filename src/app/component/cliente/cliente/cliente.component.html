@@ -1,0 +1,155 @@
+<div class="header">
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col">
+        <h2 class="text">Gestión de Clientes</h2>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal" (click)="openForm()">
+          <i class="bi bi-plus-circle"></i> Nuevo Cliente
+        </button>
+      </div>
+    </div>
+
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="text" class="form-control" placeholder="Buscar por nombre, email o teléfono"
+                [(ngModel)]="searchTerm" (input)="onSearchChange()">
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <select class="form-select" [(ngModel)]="filterType" (change)="onFilterChange()">
+              <option value="all">Todos los clientes</option>
+              <option value="active">Con contratos activos</option>
+              <option value="inactive">Sin contratos activos</option>
+              <option value="recent">Agregados recientemente</option>
+            </select>
+          </div>
+
+
+          <div class="col-md-2">
+            <button type="button" class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="text-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2">Cargando clientes...</p>
+    </div>
+
+    <div *ngIf="!loading && filteredClients.length === 0" class="text-center py-4">
+      <i class="bi bi-search" style="font-size: 2rem;"></i>
+      <p class="mt-2">No se encontraron clientes con los filtros aplicados</p>
+      <button class="btn btn-outline-primary" (click)="resetFilters()">
+        Ver todos los clientes
+      </button>
+    </div>
+    <div *ngIf="!loading && filteredClients.length > 0" class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Telefono</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let client of filteredClients">
+            <td>{{ client.name }}</td>
+            <td>{{ client.lastName }}</td>
+            <td>{{ client.phone }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-info" [routerLink]="['/clientes/edit', client._id]">
+                Editar
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteClient(client._id || '')">
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <!-- Modal para crear/editar cliente -->
+  <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="clientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="clientModalLabel">{{ selectedClient ? 'Editar Cliente' : 'Nuevo Cliente' }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="clientForm" (ngSubmit)="saveClient()">
+            <div class="mb-3">
+              <label for="name" class="form-label">Nombre *</label>
+              <input type="text" class="form-control" id="name" formControlName="name"
+                [ngClass]="{'is-invalid': clientForm.get('name')?.invalid && clientForm.get('name')?.touched}">
+              <div class="invalid-feedback" *ngIf="clientForm.get('name')?.invalid && clientForm.get('name')?.touched">
+                El nombre es requerido
+              </div>
+
+            </div>
+            <div class="mb-3">
+              <label for="lastName" class="form-label">Apellido *</label>
+              <input type="text" class="form-control" id="lastName" formControlName="lastName"
+                [ngClass]="{'is-invalid': clientForm.get('lastName')?.invalid && clientForm.get('lastName')?.touched}">
+              <div class="invalid-feedback"
+                *ngIf="clientForm.get('lastName')?.invalid && clientForm.get('lastName')?.touched">
+                El Apellido es requerido
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email *</label>
+              <input type="email" class="form-control" id="email" formControlName="email"
+                [ngClass]="{'is-invalid': clientForm.get('email')?.invalid && clientForm.get('email')?.touched}">
+              <div class="invalid-feedback"
+                *ngIf="clientForm.get('email')?.invalid && clientForm.get('email')?.touched">
+                <span *ngIf="clientForm.get('email')?.errors?.['required']">El email es requerido</span>
+                <span *ngIf="clientForm.get('email')?.errors?.['email']">Ingrese un email válido</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="phone" class="form-label">Teléfono</label>
+              <input type="tel" class="form-control" id="phone" formControlName="phone">
+            </div>
+
+            <div class="mb-3">
+              <label for="address" class="form-label">Dirección</label>
+              <input type="text" class="form-control" id="address" formControlName="address">
+            </div>
+
+            <div class="mb-3">
+              <label for="contactPerson" class="form-label">Persona de Contacto</label>
+              <input type="text" class="form-control" id="contactPerson" formControlName="contactPerson">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" [disabled]="clientForm.invalid || submitting"
+            (click)="saveClient()">
+            {{ submitting ? 'Guardando...' : (selectedClient ? 'Actualizar' : 'Guardar') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

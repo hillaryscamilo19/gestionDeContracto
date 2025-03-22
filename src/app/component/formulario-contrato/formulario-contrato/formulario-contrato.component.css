@@ -1,52 +1,57 @@
 .tabs {
-    width: 100%;
-    margin: 20px auto;
-  }
+  width: 100%;
+  margin: 20px auto;
+}
 
-  .tabs-labels {
-    display: flex;
-    justify-content: flex-start;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
+.tabs-labels {
+  display: flex;
+  justify-content: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
 
-  .tabs-labels label {
-    padding: 10px 20px;
-    background-color: #ff1212;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
+.boton-Modal {
+  display: flex;
 
-  .tabs-labels label:hover {
-    background-color: #ff2f2f;
-  }
+}
 
-  .boton{
-    width: 36px;
-    height: 41px;
+.tabs-labels label {
+  padding: 10px 20px;
+  background-color: #ff1212;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
 
-  }
+.text {
+  width: 50px;
+}
 
-  .tabs-content {
-    display: none;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: white;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  }
+.tabs-labels label:hover {
+  background-color: #ff2f2f;
+}
 
-  .badge-custom {
-    background-color: #d1fae5; /* Verde muy claro */
-    color: #dbc70e; /* Verde oscuro */
-    padding: 5px 10px;
-    border-radius: 9999px; /* Para hacerlo totalmente redondeado */
-    font-weight: bold;
-    font-size: 0.9rem;
-  }
+.boton {
+  width: 36px;
+  height: 41px;
 
- 
+}
+
+.tabs-content {
+  display: none;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.color{
+  color: #cbc8c8;
+}
+
+
 .file-name {
   font-size: 0.9em;
   color: #666;
@@ -69,6 +74,25 @@
   position: relative;
   overflow: hidden;
 }
+
+
+.modal-container {
+  display: flex;
+ 
+}
+
+
+.modal-container1{
+  display: flex;
+}
+
+
+
+.modal-title{
+  font-family: revert;
+  font-size: 108%;
+}
+
 
 .btn-file input[type="file"] {
   position: absolute;
@@ -114,25 +138,134 @@
 }
 
 
-  /* Mostrar contenido según tab activo */
-  #tab-all:checked ~ #content-all,
-  #tab-active:checked ~ #content-active,
-  #tab-expiring:checked ~ #content-expiring,
-  #tab-expired:checked ~ #content-expired {
-    display: block;
-  }
+/* Estilos para tablas según estado */
+.tabla-todos {
+  width: 100%;
+  border-collapse: collapse;
+}
 
-  /* Estilo de tab activo */
-  #tab-all:checked ~ .tabs-labels label[for="tab-all"],
-  #tab-active:checked ~ .tabs-labels label[for="tab-active"],
-  #tab-expiring:checked ~ .tabs-labels label[for="tab-expiring"],
-  #tab-expired:checked ~ .tabs-labels label[for="tab-expired"] {
-    background-color: #007bff;
-    color: rgb(94, 171, 177);
-    font-weight: bold;
-  }
+.tabla-activos {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #e6f4ea;
+  /* Verde claro */
+}
 
-  /* Ocultar radios */
-  .tabs input[type="radio"] {
-    display: none;
-  }
+.tabla-por-vencer {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff8e1;
+  /* Amarillo claro */
+}
+
+.tabla-vencidos {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffebee;
+  /* Rojo claro */
+}
+
+/* Estilos para encabezados de tabla */
+.tabla-activos thead {
+  background-color: #c8e6c9;
+  /* Verde más oscuro para encabezado */
+}
+
+.tabla-por-vencer thead {
+  background-color: #ffe0b2;
+  /* Amarillo más oscuro para encabezado */
+}
+
+.tabla-vencidos thead {
+  background-color: #ffcdd2;
+  /* Rojo más oscuro para encabezado */
+}
+
+/* Estilos para filas según estado */
+.fila-activo {
+  background-color: #e6f4ea;
+  /* Verde claro */
+}
+
+.fila-por-vencer {
+  background-color: #fff8e1;
+  /* Amarillo claro */
+}
+
+.fila-vencido {
+  background-color: #ffebee;
+  /* Rojo claro */
+}
+
+/* Estilos para hover en filas */
+.fila-activo:hover {
+  background-color: #c8e6c9;
+  /* Verde más oscuro al pasar el mouse */
+}
+
+.fila-por-vencer:hover {
+  background-color: #ffe0b2;
+  /* Amarillo más oscuro al pasar el mouse */
+}
+
+.fila-vencido:hover {
+  background-color: #ffcdd2;
+  /* Rojo más oscuro al pasar el mouse */
+}
+
+/* Estilos para encabezados */
+.tabla-todos thead,
+.tabla-activos thead,
+.tabla-por-vencer thead,
+.tabla-vencidos thead {
+  font-weight: bold;
+}
+
+/* Estilos para celdas */
+.tabla-todos td,
+.tabla-activos td,
+.tabla-por-vencer td,
+.tabla-vencidos td,
+.tabla-todos th,
+.tabla-activos th,
+.tabla-por-vencer th,
+.tabla-vencidos th {
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Estilos para hover */
+.hover\:bg-green-100:hover {
+  background-color: rgba(220, 252, 231, 1) !important;
+}
+
+.hover\:bg-yellow-100:hover {
+  background-color: rgba(254, 249, 195, 1) !important;
+}
+
+.hover\:bg-red-100:hover {
+  background-color: rgba(254, 226, 226, 1) !important;
+}
+
+/* Mostrar contenido según tab activo */
+#tab-all:checked~#content-all,
+#tab-active:checked~#content-active,
+#tab-expiring:checked~#content-expiring,
+#tab-expired:checked~#content-expired {
+  display: block;
+}
+
+/* Estilo de tab activo */
+#tab-all:checked~.tabs-labels label[for="tab-all"],
+#tab-active:checked~.tabs-labels label[for="tab-active"],
+#tab-expiring:checked~.tabs-labels label[for="tab-expiring"],
+#tab-expired:checked~.tabs-labels label[for="tab-expired"] {
+  background-color: #007bff;
+  color: rgb(94, 171, 177);
+  font-weight: bold;
+}
+
+/* Ocultar radios */
+.tabs input[type="radio"] {
+  display: none;
+}
