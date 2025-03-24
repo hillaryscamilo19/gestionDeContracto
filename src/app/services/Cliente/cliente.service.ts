@@ -8,28 +8,20 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class ClienteService {
-  private apiUrl = `${environment.apiUrl}Cliente/clientes`
+  private apiUrl = `${environment.apiUrl}Cliente`
 
   constructor(private http: HttpClient) {}
 
-  getClients(): Observable<Client[]> {
-    return this.http.get<Client[]>(this.apiUrl).pipe(
-      tap((clients) => console.log("Clientes recibidos:", clients.length)),
-      catchError((error) => {
-        console.error("Error al obtener clientes:", error)
-        return throwError(() => error)
-      }),
-    )
+  // Obtener todos los clientes
+  getClientes(): Observable<Client[]> {
+    return this.http.get<Client[]>(`${this.apiUrl}`);
   }
 
+  // Obtener un cliente por ID
   getClient(id: string): Observable<Client> {
-    return this.http.get<Client>(`${this.apiUrl}/${id}`).pipe(
-      catchError((error) => {
-        console.error(`Error al obtener cliente ${id}:`, error)
-        return throwError(() => error)
-      }),
-    )
+    return this.http.get<Client>(`${this.apiUrl}/${id}`);
   }
+
 
   createClient(client: Client): Observable<Client> {
     return this.http.post<Client>(this.apiUrl, client).pipe(

@@ -9,10 +9,14 @@
     <div class="container-header">
       <div class="row">
         <div class="col-md-4 mb-3">
-          <select class="form-select" [(ngModel)]="filtroCliente" (change)="aplicarFiltros()">
-            <option value="">Todos los clientes</option>
-            <option *ngFor="let cliente of clientes" [value]="cliente._id">{{ cliente.nombre }}</option>
-          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Buscar..." [(ngModel)]="terminoBusqueda" (input)="aplicarFiltros()">
+            <button class="btn btn-outline-secondary" type="button" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
         </div>
         
         <div class="col-md-4 mb-3">
@@ -24,14 +28,7 @@
           </select>
         </div>
         
-        <div class="col-md-4 mb-3">
-          <div class="input-group">
-            <input type="text" class="form-control" placeholder="Buscar..." [(ngModel)]="terminoBusqueda" (input)="aplicarFiltros()">
-            <button class="btn btn-outline-secondary" type="button" (click)="limpiarFiltros()">
-              <i class="bi bi-x-circle"></i>
-            </button>
-          </div>
-        </div>
+
       </div>
     </div>
 <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -46,42 +43,34 @@
       <table class="table table-hover">
         <thead>
           <tr>
+            <th>Titulo</th>
             <th>Cliente</th>
-            <th>Descripción</th>
-            <th>Fecha Inicio</th>
-            <th>Fecha Vencimiento</th>
+            <th>Tipo</th>
+            <th>Propietario</th>
+            <th>Servicio</th>
+            <th>Vencimiento</th>
             <th>Estado</th>
-            <th>Documento</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let contrato of contratosFiltered">
+            <td>{{ contrato.descripcion }}</td>
             <td>{{ contrato.clienteNombre }}</td>
-            <td>{{ contrato.description }}</td>
-            <td>{{ contrato.fechaInicio | date:'dd/MM/yyyy' }}</td>
-            <td>{{ contrato.fechaVencimiento | date:'dd/MM/yyyy' }}</td>
+            <td>{{ contrato.tipoContrato }}</td>
+            <td>{{ contrato.empresaPropietario }}</td>
+            <td>{{ contrato.servicio }}</td>
+            <td>{{ contrato.vencimiento | date:'dd/MM/yyyy' }}</td>
             <td>
               <span class="badge rounded-pill" [ngClass]="getEstadoClase(contrato)">
                 {{ getEstadoTexto(contrato) }}
               </span>
             </td>
-            <td>
-              <div *ngIf="tienePdf(contrato)" class="d-flex align-items-center">
-                <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
-                <button class="btn btn-sm btn-outline-primary me-1" (click)="visualizarPdf(contrato._id)">
-                  <i class="bi bi-eye"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-success" (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
-                  <i class="bi bi-download"></i>
-                </button>
-              </div>
-              <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin documento</span>
-            </td>
+
             <td>
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal"
-                  data-bs-target="#staticBackdrop" (click)="verContrato(contrato)">
+                  data-bs-target="#staticBackdrop" (click)="verContrato(contrato._id)">
                   <i class="bi bi-eye-fill"></i>
                 </button>
                 <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
@@ -94,7 +83,6 @@
               </div>
             </td>
           </tr>
-          
           <!-- Mensaje cuando no hay contratos -->
           <tr *ngIf="contratosFiltered.length === 0">
             <td colspan="7" class="text-center py-3">

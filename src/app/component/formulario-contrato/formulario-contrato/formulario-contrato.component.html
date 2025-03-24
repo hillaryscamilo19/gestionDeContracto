@@ -1,75 +1,5 @@
 <!-- Nav Tabs -->
-<ul class="nav nav-tabs" id="myTab" role="tablist">
-
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="activo-tab" data-bs-toggle="tab" data-bs-target="#active" type="button"
-      role="tab">Activos</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="expiring-tab" data-bs-toggle="tab" data-bs-target="#expiring" type="button"
-      role="tab">Por Vencer</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired" type="button"
-      role="tab">Vencidos</button>
-  </li>
-</ul>
-
-<!-- Tab Content -->
-<div class="tab-content mt-3" id="myTabContent">
-  <!-- Activos -->
-  <div class="tab-pane fade" id="active" role="tabpanel">
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>Proveedor</th>
-          <th>Descipcion</th>
-          <th>Fecha Inicio</th>
-          <th>Fecha De vencimiento</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let contrato of filtrarPorEstado('Activo')">
-          <td class="text">{{ contrato.clienteNombre }} {{contrato.clienteEmail}} </td>
-          <td>{{ contrato.description }}</td>
-          <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
-          <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
-          <td>
-            <span class="badge rounded-pill" [ngClass]="getEstadoClase(contrato)">
-              {{ getEstadoTexto(contrato) }}
-            </span>
-          </td>
-          <td>
-            <div *ngIf="tienePdf(contrato)" class="d-flex align-items-center">
-              <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
-              <button class="btn btn-sm btn-outline-primary me-1" (click)="visualizarPdf(contrato._id)">
-                <i class="bi bi-eye"></i> Ver
-              </button>
-              <button class="btn btn-sm btn-outline-success" (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
-                <i class="bi bi-download"></i> Descargar
-              </button>
-            </div>
-            <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin documento</span>
-          </td>
-          <td>
-            <div class="btn-group">
-              <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="verContrato(contrato)">
-                <i class="bi bi-eye-fill"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal" (click)="editarContrato(contrato._id)">
-                <i class="bi bi-highlighter"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
-                <i class="bi bi-trash-fill"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+ <h2>Contratos Próximos a Vencer</h2>
 
   <!-- Por Vencer -->
   <div class="tab-pane fade" id="expiring" role="tabpanel">
@@ -87,29 +17,17 @@
       <tbody>
         <tr *ngFor="let contrato of filtrarPorEstado('Por vencer')">
           <td class="text">{{ contrato.clienteNombre }} {{contrato.clienteEmail}} </td>
-          <td>{{ contrato.description }}</td>
-          <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
-          <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
+          <td>{{ contrato.descripcion }}</td>
+          <td>{{ contrato.creado | date:'MMM d, yyyy' }}</td>
+          <td>{{ contrato.vencimiento| date:'MMM d, yyyy' }}</td>
           <td>
             <span class="badge rounded-pill" [ngClass]="getEstadoClase(contrato)">
               {{ getEstadoTexto(contrato) }}
             </span>
           </td>
           <td>
-            <div *ngIf="tienePdf(contrato)" class="d-flex align-items-center">
-              <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
-              <button class="btn btn-sm btn-outline-primary me-1" (click)="visualizarPdf(contrato._id)">
-                <i class="bi bi-eye"></i> Ver
-              </button>
-              <button class="btn btn-sm btn-outline-success" (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
-                <i class="bi bi-download"></i> Descargar
-              </button>
-            </div>
-            <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin documento</span>
-          </td>
-          <td>
             <div class="btn-group">
-              <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="verContrato(contrato)">
+              <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="verContrato(contrato._id)">
                 <i class="bi bi-eye-fill"></i>
               </button>
               <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal" (click)="editarContrato(contrato._id)">
@@ -119,61 +37,6 @@
                 <i class="bi bi-trash-fill"></i>
               </button>
             </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Vencidos -->
-  <div class="tab-pane fade" id="expired" role="tabpanel">
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>Proveedor</th>
-          <th>Descipcion</th>
-          <th>Fecha Inicio</th>
-          <th>Fecha De vencimiento</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let contrato of filtrarPorEstado('Vencido')">
-          <td class="text">{{ contrato.clienteNombre }} {{contrato.clienteEmail}} </td>
-          <td>{{ contrato.description }}</td>
-          <td>{{ contrato.fechaInicio | date:'MMM d, yyyy' }}</td>
-          <td>{{ contrato.fechaVencimiento| date:'MMM d, yyyy' }}</td>
-          <td>
-            <td>
-              <span class="badge rounded-pill" [ngClass]="getEstadoClase(contrato)">
-                {{ getEstadoTexto(contrato) }}
-              </span>
-            </td>
-            <td>
-              <div *ngIf="verContrato(contrato._id)" class="d-flex align-items-center">
-                <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
-                <button class="btn btn-sm btn-outline-primary me-1" (click)="visualizarPdf(contrato._id)">
-                  <i class="bi bi-eye"></i> Ver
-                </button>
-                <button class="btn btn-sm btn-outline-success" (click)="descargarPdf(contrato._id, contrato.clienteNombre)">
-                  <i class="bi bi-download"></i> Descargar
-                </button>
-              </div>
-              <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin documento</span>
-            </td>
-            <td>
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="verContrato(contrato._id)">
-                  <i class="bi bi-eye-fill"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal" (click)="editarContrato(contrato._id)">
-                  <i class="bi bi-highlighter"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
-                  <i class="bi bi-trash-fill"></i>
-                </button>
-              </div>
           </td>
         </tr>
       </tbody>

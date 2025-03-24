@@ -11,11 +11,14 @@
   <div class="card">
     <span class="card-title">Total de Contrato</span>
     <span class="card-number">{{ filtrarPorEstado('all').length }}</span>
+    <Button variant="ghost" size="sm" routerLink="/contrato">
+      Nuevo contrato
+    </Button>
   </div>
   <div class="card">
     <span class="card-title">Contracto</span>
     <span class="card-number warning">{{ filtrarPorEstado('Por vencer').length }}</span>
-    <Button variant="ghost" size="sm" routerLink="/contrato">
+    <Button variant="ghost" size="sm" routerLink="/detalle-contrato/:id">
       Ver Detalles
     </Button>
   </div>

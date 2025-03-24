@@ -1,44 +1,49 @@
-import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { throwError } from 'rxjs';
-import { Observable } from 'rxjs/internal/Observable';
-import { Client } from 'src/app/models/contract/contract.module';
+import  { HttpClient } from "@angular/common/http"
+import { Component,  OnInit } from "@angular/core"
+// Cambia la importación de type-only a una importación regular
+import {  FormGroup, Validators } from "@angular/forms"
+import { throwError } from "rxjs"
+import { Observable } from "rxjs/internal/Observable"
+import  { Client } from "src/app/models/contract/contract.module"
+import  { ClienteService } from "src/app/services/Cliente/cliente.service"
+import * as bootstrap from "bootstrap"
+import {  FormBuilder } from '@angular/forms';
 
-import { ClienteService } from 'src/app/services/Cliente/cliente.service';
+
+
 
 @Component({
-  selector: 'app-cliente',
-  templateUrl: './cliente.component.html',
-  styleUrls: ['./cliente.component.css']
+  selector: "app-cliente",
+  templateUrl: "./cliente.component.html",
+  styleUrls: ["./cliente.component.css"],
 })
-export class ClienteComponent {
-  allClients: any[] = [];
-  searchTerm: string = '';
-  filterType: string = 'all';
-  sortBy: string = 'nameAsc';
+export class ClienteComponent implements OnInit {
+  allClients: any[] = []
+  searchTerm = ""
+  filterType = "all"
+  sortBy = "nameAsc"
   clients: Client[] = []
   clientForm: FormGroup
   selectedClient: Client | null = null
   submitting = false
   mostrarAlerta = false
   tipoAlerta = "success"
-  filteredClients: any[] = [];
+  filteredClients: any[] = []
   mensajeAlerta = ""
   message: { type: string; text: string } | null = null
-  apiUrl = "http://localhost:3000/clients"
-  loading: any;
+  apiUrl = "http://10.0.0.15:6970/api/Cliente"
+  loading = false
+  modalInstance: any = null
 
   constructor(
-    private fb: FormBuilder,
-    private clientService: ClienteService,
-    private http: HttpClient,
+    private fb: FormBuilder , private clientService: ClienteService, private http: HttpClient,
   ) {
     this.clientForm = this.fb.group({
       name: ["", Validators.required],
-      lastname: ["", Validators.required],
+      LastName: ["", Validators.required], 
       email: ["", [Validators.required, Validators.email]],
       phone: [""],
+      Documento_Identidad: [""],
       address: [""],
       contactPerson: [""],
     })
@@ -49,99 +54,121 @@ export class ClienteComponent {
   }
 
   loadClients(): void {
-    this.loading = true;
-    this.clientService.getClients().subscribe({
+    this.loading = true
+    this.clientService.getClientes().subscribe({
       next: (data) => {
-        this.allClients = data;
-        this.applyFilters(); 
-        this.loading = false;
+        this.allClients = data
+        this.applyFilters()
+        this.loading = false
       },
       error: (error) => {
-        console.error('Error al cargar clientes:', error);
-        this.loading = false;
-      }
-    });
+        console.error("Error al cargar clientes:", error)
+        this.loading = false
+      },
+    })
   }
 
-
-  
   applyFilters(): void {
     // Filtrar por término de búsqueda
-    let result = this.allClients;
-    
+    let result = this.allClients
+
     if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      result = result.filter(client => 
-        (client.name || '').toLowerCase().includes(term) ||
-        (client.email || '').toLowerCase().includes(term) ||
-        (client.phone || '').toLowerCase().includes(term)
-      );
+      const term = this.searchTerm.toLowerCase()
+      result = result.filter(
+        (client) =>
+          (client.name || "").toLowerCase().includes(term) ||
+          (client.email || "").toLowerCase().includes(term) ||
+          (client.phone || "").toLowerCase().includes(term),
+      )
     }
-    
+
     // Filtrar por tipo
-    if (this.filterType !== 'all') {
-      if (this.filterType === 'active') {
-        result = result.filter(client => client.hasActiveContracts);
-      } else if (this.filterType === 'inactive') {
-        result = result.filter(client => !client.hasActiveContracts);
-      } else if (this.filterType === 'recent') {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
-        result = result.filter(client => {
-          if (!client.createdAt) return false;
-          const createdAt = new Date(client.createdAt);
-          return createdAt >= thirtyDaysAgo;
-        });
+    if (this.filterType !== "all") {
+      if (this.filterType === "active") {
+        result = result.filter((client) => client.hasActiveContracts)
+      } else if (this.filterType === "inactive") {
+        result = result.filter((client) => !client.hasActiveContracts)
+      } else if (this.filterType === "recent") {
+        const thirtyDaysAgo = new Date()
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+        result = result.filter((client) => {
+          if (!client.createdAt) return false
+          const createdAt = new Date(client.createdAt)
+          return createdAt >= thirtyDaysAgo
+        })
       }
     }
-    
-    this.filteredClients = result;
+
+    this.filteredClients = result
   }
 
-    filterOptions = [
-      { value: 'all', label: 'Todos los clientes' },
-      { value: 'active', label: 'Con contratos activos' },
-      { value: 'inactive', label: 'Sin contratos activos' },
-      { value: 'recent', label: 'Agregados recientemente' }
-    ];
-    
-    sortOptions = [
-      { value: 'nameAsc', label: 'Nombre (A-Z)' },
-      { value: 'nameDesc', label: 'Nombre (Z-A)' },
-      { value: 'dateAsc', label: 'Fecha de creación (Antigua-Nueva)' },
-      { value: 'dateDesc', label: 'Fecha de creación (Nueva-Antigua)' },
-      { value: 'contractsDesc', label: 'Más contratos primero' }
-    ];
-  
+  filterOptions = [
+    { value: "all", label: "Todos los clientes" },
+    { value: "active", label: "Con contratos activos" },
+    { value: "inactive", label: "Sin contratos activos" },
+    { value: "recent", label: "Agregados recientemente" },
+  ]
 
+  sortOptions = [
+    { value: "nameAsc", label: "Nombre (A-Z)" },
+    { value: "nameDesc", label: "Nombre (Z-A)" },
+    { value: "dateAsc", label: "Fecha de creación (Antigua-Nueva)" },
+    { value: "dateDesc", label: "Fecha de creación (Nueva-Antigua)" },
+    { value: "contractsDesc", label: "Más contratos primero" },
+  ]
 
+  onSearchChange(): void {
+    this.applyFilters()
+  }
 
-    onSearchChange(): void {
-      this.applyFilters();
-    }
-    
-    onFilterChange(): void {
-      this.applyFilters();
-    }
-    
-    resetFilters(): void {
-      this.searchTerm = '';
-      this.filterType = 'all';
-      this.applyFilters();
-    }
+  onFilterChange(): void {
+    this.applyFilters()
+  }
 
+  resetFilters(): void {
+    this.searchTerm = ""
+    this.filterType = "all"
+    this.applyFilters()
+  }
 
-  openForm() {
-    throw new Error('Method not implemented.');
+  // Implementación del método openForm
+  openForm(): void {
+    // Resetear el formulario y el cliente seleccionado
+    this.resetForm()
+
+    // Inicializar el formulario con valores vacíos
+    this.clientForm.patchValue({
+      name: "",
+      LastName: "", // Asegúrate de que coincida con el nombre del control
+      email: "",
+      phone: "",
+      Documento_Identidad: "",
+      address: "",
+      contactPerson: "",
+    })
+
+    // El modal se abrirá automáticamente por el atributo data-bs-toggle="modal" data-bs-target="#clientModal"
   }
 
   createClient(client: Client): Observable<Client> {
     return this.http.post<Client>(this.apiUrl, client)
   }
 
-  deleteClient(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`)
+  deleteClient(id: string): void {
+    if (confirm("¿Está seguro de eliminar este cliente?")) {
+      this.clientService.deleteClient(id).subscribe({
+        next: () => {
+          this.clients = this.clients.filter((c) => c._id !== id)
+          this.loadClients() // Recargar la lista después de eliminar
+          this.showMessage("success", "Cliente eliminado correctamente")
+        },
+        error: (error) => {
+          console.error("Error al eliminar cliente:", error)
+          this.showMessage("danger", "Error al eliminar el cliente")
+        },
+      })
+    }
   }
 
   updateClient(id: string | undefined, client: Client): Observable<Client> {
@@ -154,12 +181,20 @@ export class ClienteComponent {
   editClient(client: Client): void {
     this.selectedClient = { ...client } // Crear una copia para evitar modificar el original
     this.clientForm.patchValue({
-      name: client.name,
-      email: client.email,
+      name: client.Name,
+      LastName: client.LastName, // Asegúrate de que coincida con el nombre del control
+      email: client.Email,
       phone: client.phone || "",
-      address: client.address || "",
-      contactPerson: client.contactPerson || "",
+      address: client.Address || "",
+      Documento_Identidad: client.Documento_Identidad || "",
     })
+
+    // Abrir el modal
+    const modalElement = document.getElementById("clientModal")
+    if (modalElement) {
+      this.modalInstance = new bootstrap.Modal(modalElement)
+      this.modalInstance.show()
+    }
   }
 
   saveClient(): void {
@@ -182,6 +217,8 @@ export class ClienteComponent {
           }
           this.showMessage("success", "Cliente actualizado correctamente")
           this.resetForm()
+          this.loadClients() 
+          this.cerrarModal()
         },
         error: (error) => {
           console.error("Error al actualizar cliente:", error)
@@ -190,12 +227,13 @@ export class ClienteComponent {
         },
       })
     } else {
-      // Create new client
       this.clientService.createClient(clientData).subscribe({
         next: (newClient: Client) => {
           this.clients.push(newClient)
           this.showMessage("success", "Cliente creado correctamente")
           this.resetForm()
+          this.loadClients() 
+          this.cerrarModal()
         },
         error: (error) => {
           console.error("Error al crear cliente:", error)
@@ -207,20 +245,26 @@ export class ClienteComponent {
   }
 
   eliminarCliente(id: string): void {
-    if (confirm("¿Está seguro de eliminar este contrato?")) {
+    if (confirm("¿Está seguro de eliminar este cliente?")) {
       this.clientService.deleteClient(id).subscribe({
         next: () => {
           this.clients = this.clients.filter((c) => c._id !== id)
-          this.mostrarMensaje("success", "Contrato eliminado correctamente")
+          this.mostrarMensaje("success", "Cliente eliminado correctamente")
+          this.loadClients()
         },
         error: (error: any) => {
-          console.error("Error al eliminar contrato:", error)
-          this.mostrarMensaje("danger", "Error al eliminar el contrato")
+          console.error("Error al eliminar cliente:", error)
+          this.mostrarMensaje("danger", "Error al eliminar el cliente")
         },
       })
     }
   }
 
+  cerrarModal(): void {
+    if (this.modalInstance) {
+      this.modalInstance.hide()
+    }
+  }
 
   mostrarMensaje(tipo: string, mensaje: string): void {
     this.tipoAlerta = tipo
@@ -244,3 +288,4 @@ export class ClienteComponent {
     }, 3000)
   }
 }
+

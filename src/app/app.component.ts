@@ -4,6 +4,8 @@ import { ContractoService } from './services/contracto/contracto.service';
 import { Client, ContractModule } from './models/contract/contract.module';
 import { Modal } from 'bootstrap';
 import { ClienteService } from './services/Cliente/cliente.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import * as bootstrap from 'bootstrap';
 
 @Component({
   selector: 'app-root',
@@ -19,30 +21,35 @@ export class AppComponent {
   contratoForm!: FormGroup
   cargando = false
   enviando = false
+  filteredClients: any[] = [];
   terminoBusqueda = ""
-  clients: any[] = []
+  clientes: any[] = []
   archivoSeleccionado: File | null = null
   nombreArchivo = ""
-  pdfSrc: string | null = null;
   cargandoPdf: boolean = false;
   mostrarPdfViewer: boolean = false;
   errorArchivo = ""
+  allClients: any[] = [];
+  searchTerm: string = '';
+  filterType: string = 'all';
   mostrarAlerta = false
+  tiposContrato: any[] = []
+  empresasPropietario: any[] = []
   tipoAlerta = "success"
   mensajeAlerta = ""
   private modalRef: any
-
+  pdfSrc: string | ArrayBuffer | SafeResourceUrl | null = null;
   nuevoContrato: any = {
-    clientName: "",
-    clientEmail: "",
-    description: "",
-    startDate: new Date().toISOString().split("T")[0],
-    expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    numeroContrato: "",
-    contractType: { type: String, enum: ["local", "internacional", "aseguradora"], default: "local" },
-    owner: { type: String, enum: ["ssv", "klarida", "abrah", "softexpert"], default: "local" },
-  }
-  pdfSeleccionado: File | null = null
+    numeroContrato: '',
+    clienteId: null,
+    tipoContrato: null,
+    empresaPropietario: null,
+    servicio: '',
+    creado: this.formatDateForInput(new Date()),
+    vencimiento: '',
+    descripcion: '',
+    estado: 'Activo'
+  };
   currentYear: any;
 
 
@@ -50,7 +57,8 @@ export class AppComponent {
     private fb: FormBuilder,
     private contratoService: ContractoService,
     private clientService: ClienteService,
-  ) {}
+    private sanitizer: DomSanitizer
+  ) { }
 
   ngOnInit(): void {
     this.inicializarFormulario()
@@ -71,62 +79,50 @@ export class AppComponent {
 
   inicializarFormulario(): void {
     this.contratoForm = this.fb.group({
-      clientId: ["", Validators.required],
-      clientName: ["", Validators.required],
-      clientEmail: ["", [Validators.required, Validators.email]],
-      contractNumber: ["", Validators.required],
-      description: ["", Validators.required],
-      startDate: [new Date().toISOString().substring(0, 10), Validators.required],
-      expirationDate: ["", Validators.required],
-      contractType: ["", Validators.required],
-      owner: ["", Validators.required],
-      serviceType: ["", Validators.required],
+      clienteId: ["", Validators.required],
+      clienteNombre: ["", Validators.required],
+      numeroContrato: ["", Validators.required],
+      descripcion: ["", Validators.required],
+      creado: [new Date().toISOString().substring(0, 10), Validators.required],
+      vencimiento: ["", Validators.required],
+      tipoContrato: ["", Validators.required],
+      empresaPropietario: ["", Validators.required],
+      servicio: ["", Validators.required],
     })
   }
 
   cargarClientes(): void {
-    this.clientService.getClients().subscribe({
-      next: (data) => {
-        this.clients = data
-      },
-      error: (error) => {
-        console.error("Error al cargar clientes:", error)
-        this.mostrarMensaje("danger", "Error al cargar los clientes")
-      },
-    })
+    this.clientService.getClientes
+      ().subscribe({
+        next: (data) => {
+          this.clientes = data;
+        },
+        error: (error: any) => {
+          console.error('Error al cargar clientes:', error);
+        }
+      });
   }
-
   cargarContratos(): void {
-    this.cargando = true
+    this.cargando = true;
     this.contratoService.getContratos().subscribe({
       next: (data) => {
-        this.contratos = data
-
-        this.contratosFiltrados = [...this.contratos]
-
-        // Depuración: Mostrar los estados de los contratos
-        this.contratos.forEach((contrato) => {
-        })
-
-        this.cargando = false
+        this.contratos = data;
+        this.cargando = false;
       },
-      error: (error) => {
-        console.error("Error al cargar contratos:", error)
-        this.mostrarMensaje("error", "Error al cargar los contratos")
-        this.cargando = false
-      },
-    })
+      error: (error: any) => {
+        console.error('Error al cargar contratos:', error);
+        this.cargando = false;
+      }
+    });
   }
-
 
   onClientChange(event: any): void {
     const clientId = event.target.value
     if (clientId) {
-      const selectedClient = this.clients.find((c) => c._id === clientId)
+      const selectedClient = this.clientes.find((c) => c._id === clientId)
       if (selectedClient) {
         this.contratoForm.patchValue({
-          clientName: selectedClient.name,
-          clientEmail: selectedClient.email,
+          clienteNombre: selectedClient.name,
         })
       }
     }
@@ -135,12 +131,35 @@ export class AppComponent {
   abrirFormulario(): void {
     this.contratoSeleccionado = null
     this.contratoForm.reset({
-      startDate: new Date().toISOString().substring(0, 10),
-      contractType: "local",
-      owner: "ssv",
+      creado: new Date().toISOString().substring(0, 10),
+      tipoContrato: "local",
+      empresaPropietario: "ssv",
     })
     this.limpiarArchivo()
   }
+
+  cargarTiposContrato(): void {
+    this.contratoService.getTiposContrato().subscribe({
+      next: (data) => {
+        this.tiposContrato = data;
+      },
+      error: (error) => {
+        console.error('Error al cargar tipos de contrato:', error);
+      }
+    });
+  }
+
+  cargarEmpresasPropietario(): void {
+    this.contratoService.getEmpresasPropietario().subscribe({
+      next: (data) => {
+        this.empresasPropietario = data;
+      },
+      error: (error) => {
+        console.error('Error al cargar empresas propietario:', error);
+      }
+    });
+  }
+  
 
   editarContrato(id: string): void {
     this.cargando = true
@@ -150,15 +169,15 @@ export class AppComponent {
 
         // Actualizar el formulario con los datos del contrato
         this.contratoForm.patchValue({
-          clientName: contrato.clienteNombre || contrato.clientName,
+          clienteNombre: contrato.clienteNombre || contrato.clienteNombre,
           clientEmail: contrato.clienteEmail || contrato.clientEmail,
-          contractNumber: contrato.numeroContrato || contrato.contractNumber,
-          description: contrato.descripcion || contrato.description,
-          startDate: new Date(contrato.fechaInicio || contrato.startDate).toISOString().substring(0, 10),
-          expirationDate: new Date(contrato.fechaVencimiento || contrato.expirationDate).toISOString().substring(0, 10),
-          contractType: contrato.contractType || "local",
-          owner: contrato.owner || "ssv",
-          serviceType: contrato.serviceType || "",
+          numeroContrato: contrato.numeroContrato || contrato.numeroContrato,
+          descripcion: contrato.descripcion || contrato.descripcion,
+          creado: new Date(contrato.creado || contrato.creado).toISOString().substring(0, 10),
+          vencimiento: new Date(contrato.vencimiento || contrato.vencimiento).toISOString().substring(0, 10),
+          tipoContrato: contrato.tipoContrato || "local",
+          empresaPropietario: contrato.empresaPropietario || "ssv",
+          servicio: contrato.servicio || "",
         })
 
         // Si el contrato tiene un archivo PDF, mostrar su nombre
@@ -184,7 +203,7 @@ export class AppComponent {
     this.mostrarPdfViewer = true;
     this.contratoSeleccionado = this.contratos.find(c => c._id === contratoId);
 
-    this.contratoService.obtenerUrlPdf(contratoId).subscribe({
+    this.contratoService.obtenerPdfBlob(contratoId).subscribe({
       next: (response: any) => {
         this.pdfSrc = response.url;
         this.cargandoPdf = false;
@@ -197,24 +216,34 @@ export class AppComponent {
     });
   }
 
-  descargarPdf(contratoId: string, nombreCliente: string): void {
-    this.contratoService.descargarPdf(contratoId).subscribe({
-      next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `contrato-${nombreCliente}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+  descargarPdf(contratoId: string): void {
+    // Primero obtener el nombre del cliente
+    this.contratoService.getContrato(contratoId).subscribe({
+      next: (contrato) => {
+        // Luego obtener el blob del PDF
+        this.contratoService.obtenerPdfBlob(contratoId).subscribe({
+          next: (blob) => {
+            // Crear URL del blob
+            const url = window.URL.createObjectURL(blob);
+            // Crear enlace de descarga
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Contrato_${contrato.clienteNombre || 'Descarga'}.pdf`;
+            // Simular clic
+            link.click();
+            // Liberar URL
+            window.URL.revokeObjectURL(url);
+          },
+          error: (error: any) => {
+            console.error('Error al descargar PDF:', error);
+          }
+        });
       },
-      error: (error) => {
-        console.error('Error al descargar el PDF:', error);
+      error: (error: any) => {
+        console.error('Error al obtener contrato:', error);
       }
     });
   }
-
   cerrarVisualizador(): void {
     this.mostrarPdfViewer = false;
     this.pdfSrc = null;
@@ -313,16 +342,34 @@ export class AppComponent {
     console.log("Contrato seleccionado:", this.contratoSeleccionado)
   }
 
-  // Métodos para manejo de archivos
-  onFileSelected(event: any) {
+  onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      if (file.type !== "application/pdf") {
-        alert("Solo se permiten archivos PDF");
+      // Validar tipo de archivo
+      if (file.type !== 'application/pdf') {
+        this.errorArchivo = 'Solo se permiten archivos PDF';
+        this.archivoSeleccionado = null;
+        this.pdfSrc = null;
         return;
       }
-      this.pdfSeleccionado = file;
-      console.log("Archivo seleccionado:", this.pdfSeleccionado);
+
+      // Validar tamaño (5MB máximo)
+      if (file.size > 5 * 1024 * 1024) {
+        this.errorArchivo = 'El archivo no debe superar los 5MB';
+        this.archivoSeleccionado = null;
+        this.pdfSrc = null;
+        return;
+      }
+
+      this.archivoSeleccionado = file;
+      this.errorArchivo = '';
+
+      // Crear vista previa del PDF
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(e.target.result);
+      };
+      reader.readAsDataURL(file);
     }
   }
 
@@ -354,12 +401,11 @@ export class AppComponent {
     const termino = this.terminoBusqueda.toLowerCase().trim()
     this.contratosFiltrados = this.contratos.filter(
       (contrato) =>
-        (contrato.clientName || contrato.clienteNombre || "").toLowerCase().includes(termino) ||
-        (contrato.description || contrato.descripcion || "").toLowerCase().includes(termino) ||
-        (contrato.clientEmail || contrato.clienteEmail || "").toLowerCase().includes(termino) ||
-        (contrato.contractType || "").toLowerCase().includes(termino) ||
-        (contrato.owner || "").toLowerCase().includes(termino) ||
-        (contrato.serviceType || "").toLowerCase().includes(termino),
+        (contrato.clienteNombre || contrato.clienteNombre || "").toLowerCase().includes(termino) ||
+        (contrato.descripcion || contrato.descripcion || "").toLowerCase().includes(termino) ||
+        (contrato.tipoContrato || "").toLowerCase().includes(termino) ||
+        (contrato.empresaPropietario || "").toLowerCase().includes(termino) ||
+        (contrato.servicio || "").toLowerCase().includes(termino),
     )
   }
 
@@ -409,44 +455,78 @@ export class AppComponent {
     }
   }
 
-  // Método para filtrar contratos por estado
+
+
+  applyFilters(): void {
+    // Filtrar por término de búsqueda
+    let result = this.allClients;
+    
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      result = result.filter(client => 
+        (client.name || '').toLowerCase().includes(term) ||
+        (client.email || '').toLowerCase().includes(term) ||
+        (client.phone || '').toLowerCase().includes(term)
+      );
+    }
+    
+    // Filtrar por tipo
+    if (this.filterType !== 'all') {
+      if (this.filterType === 'active') {
+        result = result.filter(client => client.hasActiveContracts);
+      } else if (this.filterType === 'inactive') {
+        result = result.filter(client => !client.hasActiveContracts);
+      } else if (this.filterType === 'recent') {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        result = result.filter(client => {
+          if (!client.createdAt) return false;
+          const createdAt = new Date(client.createdAt);
+          return createdAt >= thirtyDaysAgo;
+        });
+      }
+    }
+    
+    this.filteredClients = result;
+  }
+
   filtrarPorEstado(estado: string): any[] {
     return this.contratos.filter((contrato) => this.getEstadoTexto(contrato) === estado)
   }
 
-  // Método para cerrar el modal
+
   cerrarModal(): void {
     if (this.modalRef) {
       this.modalRef.hide()
     }
   }
 
-  // Método para mostrar mensajes de alerta
   mostrarMensaje(tipo: string, mensaje: string): void {
     this.tipoAlerta = tipo
     this.mensajeAlerta = mensaje
     this.mostrarAlerta = true
 
-    // Ocultar la alerta después de 5 segundos
+
     setTimeout(() => {
       this.mostrarAlerta = false
     }, 5000)
   }
 
-  // Añadir un método para depurar todos los contratos
+
   depurarContratos(): void {
-   
+
     this.contratos.forEach((contrato, index) => {
     })
   }
 
-  // Obtener el nombre del cliente a partir del ID
+
   getClientName(clientId: string): string {
-    const client = this.clients.find((c) => c._id === clientId)
+    const client = this.clientes.find((c) => c._id === clientId)
     return client ? client.name : "Cliente no encontrado"
   }
 
-  // Obtener el nombre del tipo de contrato
+
   getContractTypeName(type: string): string {
     const types: Record<string, string> = {
       local: "Local",
@@ -456,7 +536,7 @@ export class AppComponent {
     return types[type] || type
   }
 
-  // Obtener el nombre del propietario
+
   getOwnerName(owner: string): string {
     const owners: Record<string, string> = {
       ssv: "SSV",
@@ -477,76 +557,75 @@ export class AppComponent {
 
 
 
-  crearContrato() {
-    console.log("Datos a enviar:", this.nuevoContrato)
-    const formData = new FormData()
-    const camposRequeridos = [
-      "clientName",
-      "clientEmail",
-      "description",
-      "startDate",
-      "expirationDate",
-      "numeroContrato",
-      "contractType",
-      "owner",
-      "archivoPdf"
-    ]
-    if (!this.nuevoContrato.clientName || !this.pdfSeleccionado) {
-      alert("Faltan datos obligatorios o el PDF");
-      return;
+  crearContrato(): void {
+    if (
+      !this.nuevoContrato.numeroContrato ||
+      !this.nuevoContrato.clienteId ||
+      !this.nuevoContrato.tipoContrato ||
+      !this.nuevoContrato.empresaPropietario ||
+      !this.nuevoContrato.servicio ||
+      !this.nuevoContrato.creado ||
+      !this.nuevoContrato.vencimiento ||
+      !this.nuevoContrato.descripcion
+    ) {
+      alert("Por favor complete todos los campos requeridos")
+      return
     }
-  
-    const contratoData = {
-      clientName: this.nuevoContrato.clientName?.trim(),
-      clientEmail: this.nuevoContrato.clientEmail?.trim(),
-      contractNumber: this.nuevoContrato.numeroContrato, 
-      description: this.nuevoContrato.description || "",
-      startDate: this.nuevoContrato.startDate,
-      expirationDate: this.nuevoContrato.expirationDate,
-      contractType: this.nuevoContrato.contractType,
-      owner: this.nuevoContrato.owner,
-      serviceType: this.nuevoContrato.serviceType || "",
-    };
-    // Convertir objeto en JSON y enviarlo como campo separado
-    formData.append("contratoData", JSON.stringify(contratoData));
-    formData.append("archivoPdf", this.pdfSeleccionado, this.pdfSeleccionado.name);
-
-    console.log("📤 Datos que se envían al backend:", formData);
-
-    this.contratoService.crearContrato(formData).subscribe({
-      next: (res: any) => {
-        console.log("✅ Contrato creado:", res);
-        alert("Contrato creado exitosamente");
-        this.cargarContratos();
-        this.cerrarModal();
-        this.resetearFormulario();
+    if (!this.archivoSeleccionado) {
+      alert("Por favor adjunte un archivo PDF del contrato")
+      return
+    }
+    this.enviando = true
+    this.contratoService.crearContrato(this.nuevoContrato, this.archivoSeleccionado).subscribe({
+      next: (response) => {
+        console.log("Contrato creado exitosamente:", response)
+        this.enviando = false
+        const modalElement = document.getElementById("nuevoContratoModal")
+        if (modalElement) {
+          const modal = bootstrap.Modal.getInstance(modalElement)
+          if (modal) {
+            modal.hide()
+          }
+        }
+        this.cargarContratos()
+        this.resetearFormulario()
       },
       error: (error: any) => {
-        console.error("❌ Error en la petición HTTP:", error);
-        alert("Error al crear contrato: " + (error.error?.mensaje || "Problema desconocido"));
-      
-
-        let mensajeError = "Error al crear contrato";
-        if (error.status === 0) {
-          mensajeError += " - No se pudo conectar con el servidor";
-        } else if (error.error) {
-          mensajeError += ` - ${error.error.mensaje || "Error desconocido"}`;
-        }
-        alert(mensajeError);
+        console.error("Error al crear contrato:", error)
+        this.enviando = false
+        alert("Error al crear el contrato. Por favor intente nuevamente.")
       },
-      
-    });
+    })
   }
 
-  resetearFormulario() {
-    this.nuevoContrato = {
-      clientName: "",
-      clientEmail: "",
-      description: "",
-      startDate: new Date().toISOString().split("T")[0],
-      expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-      numeroContrato: "",
-    }
-    this.pdfSeleccionado = null
+  formatDateForInput(date: Date): string {
+    return date.toISOString().split('T')[0];
   }
+
+  abrirModalNuevoContrato(): void {
+    this.resetearFormulario();
+    const modalElement = document.getElementById('nuevoContratoModal');
+    if (modalElement) {
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+    }
+  }
+
+  resetearFormulario(): void {
+    this.nuevoContrato = {
+      numeroContrato: '',
+      clienteId: null,
+      tipoContrato: null,
+      empresaPropietario: null,
+      servicio: '',
+      creado: this.formatDateForInput(new Date()),
+      vencimiento: '',
+      descripcion: '',
+      estado: 'Activo'
+    };
+    this.archivoSeleccionado = null;
+    this.pdfSrc = null;
+    this.errorArchivo = '';
+  }
+
 }

@@ -55,11 +55,11 @@ export class FormularioContratoComponent implements OnInit {
 
   inicializarFormulario(): void {
     this.contratoForm = this.fb.group({
-      clientName: ["", Validators.required],
+      clienteNombre: ["", Validators.required],
       clientEmail: ["", [Validators.required, Validators.email]],
-      description: ["", Validators.required],
-      startDate: [new Date().toISOString().substring(0, 10), Validators.required],
-      expirationDate: ["", Validators.required],
+      descripcion: ["", Validators.required],
+      creado: [new Date().toISOString().substring(0, 10), Validators.required],
+      vencimiento: ["", Validators.required],
     })
   }
 
@@ -146,7 +146,7 @@ export class FormularioContratoComponent implements OnInit {
     this.mostrarPdfViewer = true;
     this.contratoSeleccionado = this.contratos.find(c => c._id === contratoId);
 
-    this.contratoService.obtenerUrlPdf(contratoId).subscribe({
+    this.contratoService.obtenerPdfBlob(contratoId).subscribe({
       next: (response: any) => {
         this.pdfSrc = response.url;
         this.cargandoPdf = false;
@@ -201,13 +201,13 @@ export class FormularioContratoComponent implements OnInit {
 
 
         this.contratoForm.patchValue({
-          clientName: contrato.clienteNombre,
+          clienteNombre: contrato.clienteNombre,
           numeroContrato: contrato.numeroContrato,
           clientEmail: contrato.clienteEmail,
           description: contrato.descripcion,
-          startDate: new Date(contrato.fechaInicio).toISOString().substring(0, 10),
-          expirationDate: new Date(contrato.fechaVencimiento).toISOString().substring(0, 10),
-          archivoPdf: contrato.archivoPdf
+          creado: new Date(contrato.fechaInicio).toISOString().substring(0, 10),
+          vencimiento: new Date(contrato.fechaVencimiento).toISOString().substring(0, 10),
+          archivos: contrato.archivoPdf
         })
 
 
@@ -246,7 +246,7 @@ export class FormularioContratoComponent implements OnInit {
   }
 
   verContrato(contrato: any): void {
-    const url = `http://localhost:3000/api/uploads/${contrato.archivoPdf._id}`;
+    const url = `http://10.0.0.15:6970/api/archivos/ver/${contrato.archivos._id}`;
     window.open(url, "_blank");
     console.log("Contrato seleccionado:", this.contratoSeleccionado)
   }
@@ -289,25 +289,54 @@ export class FormularioContratoComponent implements OnInit {
     return contrato.archivoPdf && contrato.archivoPdf.nombre
   }
 
-  descargarPdf(id: string, clientName: string): void {
-    this.contratoService.descargarPdf(id).subscribe({
-      next: (blob: Blob | MediaSource) => {
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `contrato-${clientName}.pdf`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
+
+// formulario-contrato.component.ts
+// Reemplaza el método descargarPdf
+descargarPdf(id: string, nombreCliente?: string): void {
+  // Si se proporciona nombreCliente, úsalo; de lo contrario, obtén el contrato primero
+  if (nombreCliente) {
+    // Usar directamente el nombre del cliente proporcionado
+    this.contratoService.obtenerPdfBlob(id).subscribe({
+      next: (blob: Blob) => {
+        // Crear URL del blob
+        const url = window.URL.createObjectURL(blob);
+        // Crear enlace de descarga
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Contrato_${nombreCliente || 'Descarga'}.pdf`;
+        // Simular clic
+        link.click();
+        // Liberar URL
+        window.URL.revokeObjectURL(url);
       },
       error: (error: any) => {
-        console.error("Error al descargar PDF:", error)
-        this.mostrarMensaje("danger", "Error al descargar el PDF")
+        console.error('Error al descargar PDF:', error);
+      }
+    });
+  } else {
+    // Obtener primero el contrato para tener el nombre del cliente
+    this.contratoService.getContrato(id).subscribe({
+      next: (contrato) => {
+        this.contratoService.obtenerPdfBlob(id).subscribe({
+          next: (blob: Blob) => {
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Contrato_${contrato.clienteNombre || 'Descarga'}.pdf`;
+            link.click();
+            window.URL.revokeObjectURL(url);
+          },
+          error: (error: any) => {
+            console.error('Error al descargar PDF:', error);
+          }
+        });
       },
-    })
+      error: (error: any) => {
+        console.error('Error al obtener contrato:', error);
+      }
+    });
   }
-
+}
 
   filtrarContratos(): void {
     if (!this.terminoBusqueda.trim()) {
@@ -327,7 +356,7 @@ export class FormularioContratoComponent implements OnInit {
   getEstadoTexto(contrato: any): string {
     try {
       const hoy = new Date()
-      const fechaVencimientoStr = contrato.fechaVencimiento || contrato.expirationDate
+      const fechaVencimientoStr = contrato.fechaVencimiento || contrato.vencimiento
       if (!fechaVencimientoStr) {
         console.error("Contrato sin fecha de vencimiento:", contrato)
         return "Desconocido"

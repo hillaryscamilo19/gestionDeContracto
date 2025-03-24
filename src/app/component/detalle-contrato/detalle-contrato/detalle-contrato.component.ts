@@ -47,22 +47,21 @@ archivoSeleccionado: File | null = null
   ) {
     this.contratoForm = this.fb.group({
       clientId: ["", Validators.required],
-      clientName: ["", Validators.required],
-      clientEmail: ["", [Validators.required, Validators.email]],
-      contractNumber: ["", Validators.required],
-      description: ["", Validators.required],
-      startDate: [new Date().toISOString().substring(0, 10), Validators.required],
-      expirationDate: ["", Validators.required],
-      contractType: ["local", Validators.required],
-      owner: ["ssv", Validators.required],
-      serviceType: ["", Validators.required],
+      clienteNombre: ["", Validators.required],
+      numeroContrato: ["", Validators.required],
+      descripcion: ["", Validators.required],
+      creado: [new Date().toISOString().substring(0, 10), Validators.required],
+      vencimiento: ["", Validators.required],
+      tipoContrato: ["local", Validators.required],
+      empresaPropietario: ["ssv", Validators.required],
+      servicio: ["", Validators.required],
     })
   }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.params["id"]
     this.obtenerContrato()
-    this.cargarContratos()
+    this.cargarContrato()
     this.cargarClientes()
   }
 
@@ -80,20 +79,19 @@ archivoSeleccionado: File | null = null
     )
   }
 
-  cargarContratos(): void {
-    this.contratoService.getContratos().subscribe(
-      (data: ContractModule[]) => {
-        this.contratos = data
-        this.ordenarContratosPorEstado()
+  cargarContrato(): void {
+    this.contratoService.getContrato(this.id).subscribe({
+      next: (data) => {
+        this.contrato = data;
       },
-      (error: HttpErrorResponse) => {
-        console.error("Error al cargar los contratos:", error)
-      },
-    )
+      error: (error) => {
+        console.error('Error al cargar contrato:', error);
+      }
+    });
   }
 
   cargarClientes(): void {
-    this.clientService.getClients().subscribe(
+    this.clientService.getClientes().subscribe(
       (data: any[]) => {
         this.clients = data
       },
@@ -118,18 +116,37 @@ archivoSeleccionado: File | null = null
     return diferenciaEnDias
   }
 
-  getEstadoTexto(contrato: ContractModule): string {
-    const fechaVencimiento = new Date(contrato.expirationDate)
-    const diasRestantes = this.calcularDiasRestantes(fechaVencimiento)
-
-    if (diasRestantes < 0) {
-      return "Vencido"
-    } else if (diasRestantes <= 30) {
-      return "Por vencer"
-    } else {
-      return "Activo"
+  getEstadoTexto(contrato: any): string {
+    if (!contrato) return '';
+    
+    // Si el contrato ya tiene un estado definido, usarlo
+    if (contrato.estado) return contrato.estado;
+    
+    const hoy = new Date();
+    const fechaVencimiento = new Date(contrato.vencimiento || contrato.expirationDate);
+    
+    if (fechaVencimiento < hoy) {
+      return 'Vencido';
     }
+    
+    const diasRestantes = Math.ceil((fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diasRestantes <= 30) {
+      return 'Por vencer';
+    }
+    
+    return 'Activo';
   }
+
+  formatDate(date: string): string {
+    if (!date || date === '0001-01-01T00:00:00') return 'No especificada';
+    return this.datePipe.transform(date, 'dd/MM/yyyy') || '';
+  }
+  
+  tienePdf(): boolean {
+    return this.contrato && this.contrato.archivos && this.contrato.archivos.length > 0;
+  }
+
 
   ordenarContratosPorEstado(): void {
     this.contratos.sort((a, b) => {
@@ -152,11 +169,11 @@ archivoSeleccionado: File | null = null
     const termino = this.terminoBusqueda.toLowerCase().trim()
     this.contratosFiltrados = this.contratos.filter(
       (contrato) =>
-        contrato.clientName.toLowerCase().includes(termino) ||
-        contrato.description.toLowerCase().includes(termino) ||
-        contrato.clientEmail.toLowerCase().includes(termino),
+        contrato.clienteNombre.toLowerCase().includes(termino) ||
+        contrato.descripcion.toLowerCase().includes(termino),
     )
   }
+
 
 
   getContractTypeName(type: string): string {
@@ -168,34 +185,30 @@ archivoSeleccionado: File | null = null
     return types[type] || type
   }
 
-  getOwnerName(owner: string): string {
+  getOwnerName(empresaPropietario: string): string {
     const owners: Record<string, string> = {
       ssv: "SSV",
       klarida: "Klarida",
       abrah: "Abrah",
       softexpert: "Softexpert",
     }
-    return owners[owner] || owner
+    return owners[empresaPropietario] || empresaPropietario
   }
 
   eliminarContrato(id: string): void {
-    if (confirm("¿Está seguro de eliminar este contrato?")) {
+    if (confirm('¿Está seguro que desea eliminar este contrato? Esta acción no se puede deshacer.')) {
       this.contratoService.eliminarContrato(id).subscribe({
         next: () => {
-          this.contratos = this.contratos.filter((c) => c._id !== id)
-          this.mostrarModal = true
-          this.mensajeAlerta = "Contrato eliminado correctamente"
-          this.esExitoso = true
+          // Mostrar mensaje de éxito
+          console.log('Contrato eliminado con éxito');
         },
         error: (error) => {
-          console.error("Error al eliminar contrato:", error)
-          this.mostrarModal = true
-          this.mensajeAlerta = "Error al eliminar el contrato"
-          this.esExitoso = false
-        },
-      })
+          console.error('Error al eliminar contrato:', error);
+        }
+      });
     }
   }
+  
 
   verContrato(contrato: any): void {
     this.contratoSeleccionado = contrato
@@ -206,16 +219,16 @@ archivoSeleccionado: File | null = null
       next: (contrato) => {
         this.contratoSeleccionado = contrato
         this.contratoForm.patchValue({
-          clientId: contrato.clientId || "",
-          clientName: contrato.clienteNombre || contrato.clientName,
+          clienteId: contrato.clienteId || "",
+          clienteNombre: contrato.clienteNombre || contrato.clienteNombre,
           clientEmail: contrato.clienteEmail || contrato.clientEmail,
-          contractNumber: contrato.numeroContrato || contrato.contractNumber,
+          tipoContrato: contrato.tipoContrato || contrato.tipoContrato,
           description: contrato.descripcion || contrato.description,
-          startDate: new Date(contrato.fechaInicio || contrato.startDate).toISOString().substring(0, 10),
-          expirationDate: new Date(contrato.fechaVencimiento || contrato.expirationDate).toISOString().substring(0, 10),
+          creado: new Date(contrato.fechaInicio || contrato.creado).toISOString().substring(0, 10),
+          vencimiento: new Date(contrato.vencimiento || contrato.vencimiento).toISOString().substring(0, 10),
           contractType: contrato.contractType || "local",
-          owner: contrato.owner || "ssv",
-          serviceType: contrato.serviceType || "",
+          empresaPropietario: contrato.owner || "ssv",
+          servicio: contrato.serviceType || "",
         })
 
         if (contrato.archivoPdf && contrato.archivoPdf.nombre) {
@@ -238,7 +251,7 @@ archivoSeleccionado: File | null = null
       const selectedClient = this.clients.find((c) => c._id === clientId)
       if (selectedClient) {
         this.contratoForm.patchValue({
-          clientName: selectedClient.name,
+          clienteNombre: selectedClient.name,
           clientEmail: selectedClient.email,
         })
       }
@@ -281,41 +294,18 @@ archivoSeleccionado: File | null = null
     }
   }
 
-  tienePdf(contrato: any): boolean {
-    return contrato.archivoPdf && contrato.archivoPdf.nombre
-  }
-
 
 
   filtrarPorEstado(estado: string): any[] {
     return this.contratos.filter((contrato) => this.getEstadoTexto(contrato) === estado)
   }
 
-
   descargarPdf(id: string, nombreCliente: string): void {
-    this.contratoService.descargarPdf(id).subscribe({
-      next: (blob) => {
-        // Crear URL del objeto blob
-        const url = window.URL.createObjectURL(blob)
-
-        // Crear elemento <a> para descargar
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `contrato-${nombreCliente}.pdf`
-        document.body.appendChild(a)
-        a.click()
-
-        // Limpiar
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-      },
-      error: (error) => {
-        console.error("Error al descargar PDF:", error)
-        this.mostrarModal = true
-        this.mensajeAlerta = "Error al descargar el PDF"
-        this.esExitoso = false
-      },
-    })
+    const contrato = this.contrato;
+    if (!contrato || !contrato.archivos || contrato.archivos.length === 0) return;
+    
+    const archivo = contrato.archivos[0]; // Tomamos el primer archivo
+    this.contratoService.descargarPdf(archivo.storedFileName, nombreCliente);
   }
 
   verContratoAnterior(contrato: any): void {
@@ -332,7 +322,7 @@ archivoSeleccionado: File | null = null
   onUpdate(): void {
     // Formatea la fecha antes de enviarla al backend
     if (this.contrato.fechaVencimiento) {
-      this.contrato.fechaVencimiento = this.datePipe.transform(this.contrato.expirationDate, "yyyy-MM-dd") || ""
+      this.contrato.fechaVencimiento = this.datePipe.transform(this.contrato.vencimiento, "yyyy-MM-dd") || ""
     }
 
     // Changed from update to actualizarContrato
@@ -341,7 +331,7 @@ archivoSeleccionado: File | null = null
         this.mostrarModal = true
         this.mensajeAlerta = "Contrato actualizado exitosamente."
         this.esExitoso = true
-        this.cargarContratos()
+        this.cargarContrato()
         this.obtenerContrato()
       },
       (err: any) => {

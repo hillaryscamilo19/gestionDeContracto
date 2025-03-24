@@ -5,7 +5,7 @@
         <h2 class="text">Gestión de Clientes</h2>
       </div>
       <div class="col-auto">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal" (click)="openForm()">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal" >
           <i class="bi bi-plus-circle"></i> Nuevo Cliente
         </button>
       </div>
@@ -69,7 +69,7 @@
         <tbody>
           <tr *ngFor="let client of filteredClients">
             <td>{{ client.name }}</td>
-            <td>{{ client.lastName }}</td>
+            <td>{{ client.LastName }}</td>
             <td>{{ client.phone }}</td>
             <td>
               <button class="btn btn-sm btn-outline-info" [routerLink]="['/clientes/edit', client._id]">
@@ -106,11 +106,11 @@
 
             </div>
             <div class="mb-3">
-              <label for="lastName" class="form-label">Apellido *</label>
-              <input type="text" class="form-control" id="lastName" formControlName="lastName"
-                [ngClass]="{'is-invalid': clientForm.get('lastName')?.invalid && clientForm.get('lastName')?.touched}">
+              <label for="LastName" class="form-label">Apellido *</label>
+              <input type="text" class="form-control" id="LastName" formControlName="LastName"
+                [ngClass]="{'is-invalid': clientForm.get('LastName')?.invalid && clientForm.get('LastName')?.touched}">
               <div class="invalid-feedback"
-                *ngIf="clientForm.get('lastName')?.invalid && clientForm.get('lastName')?.touched">
+                *ngIf="clientForm.get('LastName')?.invalid && clientForm.get('LastName')?.touched">
                 El Apellido es requerido
               </div>
             </div>
@@ -132,14 +132,15 @@
             </div>
 
             <div class="mb-3">
+              <label for="Documento_Identidad" class="form-label">Cedula</label>
+              <input type="text" class="form-control" id="Documento_Identidad" formControlName="Documento_Identidad">
+            </div>
+
+            <div class="mb-3">
               <label for="address" class="form-label">Dirección</label>
               <input type="text" class="form-control" id="address" formControlName="address">
             </div>
 
-            <div class="mb-3">
-              <label for="contactPerson" class="form-label">Persona de Contacto</label>
-              <input type="text" class="form-control" id="contactPerson" formControlName="contactPerson">
-            </div>
           </form>
         </div>
         <div class="modal-footer">

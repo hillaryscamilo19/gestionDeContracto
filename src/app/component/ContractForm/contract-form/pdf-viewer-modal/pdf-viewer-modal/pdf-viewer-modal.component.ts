@@ -41,9 +41,34 @@ export class PdfViewerModalComponent {
   
   constructor(private contratoService: ContractoService) { }
   
-  descargarPdf(): void {
-    if (this.contratoId && this.clienteNombre) {
-      this.contratoService.descargarPdf(this.contratoId);
+// contract-form.component.ts
+// Reemplaza el método descargarPdf
+descargarPdf(id: string): void {
+  // Primero obtener el contrato para tener el nombre del cliente
+  this.contratoService.getContrato(id).subscribe({
+    next: (contrato) => {
+      // Luego obtener el blob del PDF
+      this.contratoService.obtenerPdfBlob(id).subscribe({
+        next: (blob: Blob) => {
+          // Crear URL del blob
+          const url = window.URL.createObjectURL(blob);
+          // Crear enlace de descarga
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `Contrato_${contrato.clienteNombre || 'Descarga'}.pdf`;
+          // Simular clic
+          link.click();
+          // Liberar URL
+          window.URL.revokeObjectURL(url);
+        },
+        error: (error: any) => {
+          console.error('Error al descargar PDF:', error);
+        }
+      });
+    },
+    error: (error: any) => {
+      console.error('Error al obtener contrato:', error);
     }
-  }
+  });
+}
 }

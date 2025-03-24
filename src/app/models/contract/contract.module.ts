@@ -15,17 +15,18 @@ export class ContractModule {
   description?: string
   startDate!: Date
   expirationDate!: Date
-  contractType!: "local" | "internacional" | "aseguradora"
+  tipoContrato!: "local" | "internacional" | "aseguradora"
   owner!: "ssv" | "klarida" | "abrah" | "softexpert"
   serviceType!: string
   previousContractPath?: string
-  archivoPdf?: {
-    nombre: string
-    ruta: string
+  archivos?: {
+    fileName: string
+    filePath: string
     tamano: number
-    fechaSubida: Date
+    storedFileName: string;
+    createdAt: Date
   }
-  clientId?: string
+  clienteId?: string
 }
 
 
@@ -46,14 +47,12 @@ export class Cliente2{
 
 export class Client {
   _id?: string
-  name!: string
-  email!: string
+  Name!: string
+  Email!: string
   phone?: string
-  lastName!: string
-  address?: string
-  contactPerson?: string
-  createdAt?: Date
-  hasActiveContracts: unknown;
-  contractCount!: number;
+  LastName!: string
+  Address?: string
+  Documento_Identidad!: string
+
 }
 

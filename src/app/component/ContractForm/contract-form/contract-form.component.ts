@@ -71,20 +71,20 @@ export class ContractFormComponent {
   inicializarFormulario(): void {
     this.contratoForm = this.fb.group({
       clientId: ["", Validators.required],
-      clientName: ["", Validators.required],
+      clienteNombre: ["", Validators.required],
       clientEmail: ["", [Validators.required, Validators.email]],
-      contractNumber: ["", Validators.required],
+      numeroContrato: ["", Validators.required],
       description: ["", Validators.required],
-      startDate: [new Date().toISOString().substring(0, 10), Validators.required],
-      expirationDate: ["", Validators.required],
-      contractType: ["local", Validators.required],
-      owner: ["ssv", Validators.required],
-      serviceType: ["", Validators.required],
+      creado: [new Date().toISOString().substring(0, 10), Validators.required],
+      vencimiento: ["", Validators.required],
+      tipoContrato: ["local", Validators.required],
+      empresaPropietario: ["ssv", Validators.required],
+      servicio: ["", Validators.required],
     })
   }
 
   cargarClientes(): void {
-    this.clientService.getClients().subscribe({
+    this.clientService.getClientes().subscribe({
       next: (data) => {
         this.clientes = data;
       },
@@ -112,7 +112,7 @@ export class ContractFormComponent {
       const termino = this.terminoBusqueda.toLowerCase();
       resultado = resultado.filter(contrato => 
         (contrato.clienteNombre || '').toLowerCase().includes(termino) ||
-        (contrato.description || '').toLowerCase().includes(termino)
+        (contrato.descripcion || '').toLowerCase().includes(termino)
       );
     }
     
@@ -144,43 +144,30 @@ export class ContractFormComponent {
     }
   }
 
-  visualizarPdf(id: string): void {
-    const contrato = this.contratos.find(c => c._id === id);
-    if (!contrato) return;
-    
-    this.contratoService.obtenerUrlPdf(id).subscribe({
-      next: (response) => {
-        this.pdfViewer.pdfSrc = response.url;
-        this.pdfViewer.titulo = `Contrato: ${contrato.clienteNombre}`;
-        this.pdfViewer.contratoId = id;
-        this.pdfViewer.clienteNombre = contrato.clienteNombre;
-        
-        // Abrir el modal usando la instancia guardada
-        if (this.modalInstance) {
-          this.modalInstance.show();
-        } else {
-          // Si por alguna razón no se inicializó, intentar nuevamente
-          const modalElement = document.getElementById('pdfViewerModal');
-          if (modalElement) {
-            this.modalInstance = new bootstrap.Modal(modalElement);
-            this.modalInstance.show();
-          } else {
-            console.error('No se pudo encontrar el elemento del modal');
-          }
-        }
+  visualizarPdf(contratoId: string): void {
+    this.cargandoPdf = true;
+    this.mostrarPdfViewer = true;
+    this.contratoSeleccionado = this.contratos.find(c => c._id === contratoId);
+
+    this.contratoService.obtenerPdfBlob(contratoId).subscribe({
+      next: (response: any) => {
+        this.pdfSrc = response.url;
+        this.cargandoPdf = false;
       },
       error: (error) => {
-        console.error('Error al obtener URL del PDF:', error);
-        // Mostrar mensaje de error
+        console.error('Error al obtener el PDF:', error);
+        this.cargandoPdf = false;
+        this.mostrarPdfViewer = false;
       }
     });
   }
+
 
   abrirFormulario(): void {
     this.contratoSeleccionado = null
     this.contratoForm.reset({
       startDate: new Date().toISOString().substring(0, 10),
-      contractType: "local",
+      tipoContrato: "local",
       owner: "ssv",
     })
     this.limpiarArchivo()
@@ -200,7 +187,7 @@ export class ContractFormComponent {
           description: contrato.descripcion || contrato.description,
           startDate: new Date(contrato.fechaInicio || contrato.startDate).toISOString().substring(0, 10),
           expirationDate: new Date(contrato.fechaVencimiento || contrato.expirationDate).toISOString().substring(0, 10),
-          contractType: contrato.contractType || "local",
+          tipoContrato: contrato.contractType || "local",
           owner: contrato.owner || "ssv",
           serviceType: contrato.serviceType || "",
         })
@@ -354,30 +341,34 @@ export class ContractFormComponent {
     return contrato.archivoPdf && contrato.archivoPdf.nombre
   }
 
-  descargarPdf(id: string, nombreCliente: string): void {
-    this.contratoService.descargarPdf(id).subscribe({
-      next: (blob) => {
-        // Crear URL del objeto blob
-        const url = window.URL.createObjectURL(blob)
-
-        // Crear elemento <a> para descargar
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `contrato-${nombreCliente}.pdf`
-        document.body.appendChild(a)
-        a.click()
-
-        // Limpiar
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-      },
-      error: (error) => {
-        console.error("Error al descargar PDF:", error)
-        this.mostrarMensaje("danger", "Error al descargar el PDF")
-      },
-    })
-  }
-
+descargarPdf(id: string): void {
+  // Primero obtener el contrato para tener el nombre del cliente
+  this.contratoService.getContrato(id).subscribe({
+    next: (contrato) => {
+      // Luego obtener el blob del PDF
+      this.contratoService.obtenerPdfBlob(id).subscribe({
+        next: (blob: Blob) => {
+          // Crear URL del blob
+          const url = window.URL.createObjectURL(blob);
+          // Crear enlace de descarga
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `Contrato_${contrato.clienteNombre || 'Descarga'}.pdf`;
+          // Simular clic
+          link.click();
+          // Liberar URL
+          window.URL.revokeObjectURL(url);
+        },
+        error: (error: any) => {
+          console.error('Error al descargar PDF:', error);
+        }
+      });
+    },
+    error: (error: any) => {
+      console.error('Error al obtener contrato:', error);
+    }
+  });
+}
 
   filtrarContratos(): void {
     if (!this.terminoBusqueda.trim()) {
@@ -389,9 +380,9 @@ export class ContractFormComponent {
     this.contratosFiltrados = this.contratos.filter(
       (contrato) =>
         (contrato.clientName || contrato.clienteNombre || "").toLowerCase().includes(termino) ||
-        (contrato.description || contrato.descripcion || "").toLowerCase().includes(termino) ||
+        (contrato.descripcion || contrato.descripcion || "").toLowerCase().includes(termino) ||
         (contrato.clientEmail || contrato.clienteEmail || "").toLowerCase().includes(termino) ||
-        (contrato.contractType || "").toLowerCase().includes(termino) ||
+        (contrato.tipoContrato || "").toLowerCase().includes(termino) ||
         (contrato.owner || "").toLowerCase().includes(termino) ||
         (contrato.serviceType || "").toLowerCase().includes(termino),
     )
@@ -407,24 +398,18 @@ export class ContractFormComponent {
   getEstadoTexto(contrato: any): string {
     try {
       const hoy = new Date()
-
-      const fechaVencimientoStr = contrato.fechaVencimiento || contrato.expirationDate
-
+      const fechaVencimientoStr = contrato.fechaVencimiento || contrato.vencimiento
       if (!fechaVencimientoStr) {
         console.error("Contrato sin fecha de vencimiento:", contrato)
         return "Desconocido"
       }
-
       const fechaVencimiento = new Date(fechaVencimientoStr)
-
       // Calcular días restantes
       const diasRestantes = Math.ceil((fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
-
-
       if (diasRestantes < 0) {
         return "Vencido"
       } else if (diasRestantes <= 30) {
-        return "Por vencer"
+        return "ProximoAvencer"
       } else {
         return "Activo"
       }
@@ -436,11 +421,10 @@ export class ContractFormComponent {
 
   getEstadoClase(contrato: any): string {
     const estado = this.getEstadoTexto(contrato)
-
     switch (estado) {
       case "Vencido":
         return "bg-danger"
-      case "Por vencer":
+      case "ProximoAvencer":
         return "bg-warning text-dark"
       case "Activo":
         return "bg-success"
@@ -492,14 +476,14 @@ export class ContractFormComponent {
     return types[type] || type
   }
 
-  getOwnerName(owner: string): string {
+  getOwnerName(empresaPropietario: string): string {
     const owners: Record<string, string> = {
       ssv: "SSV",
       klarida: "Klarida",
       abrah: "Abrah",
       softexpert: "Softexpert",
     }
-    return owners[owner] || owner
+    return owners[empresaPropietario] || empresaPropietario
   }
 
   verContratoAnterior(contrato: any): void {

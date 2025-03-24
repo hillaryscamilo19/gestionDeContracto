@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 // Importa todos los componentes
@@ -43,6 +43,7 @@ import { PdfViewerModalComponent } from './component/ContractForm/contract-form/
   imports: [
     BrowserModule,
     FormsModule,
+    DatePipe,
     ReactiveFormsModule,
     HttpClientModule,
     CommonModule,

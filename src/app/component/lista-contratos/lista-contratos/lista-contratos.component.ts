@@ -24,9 +24,9 @@ export class ListaContratosComponent implements OnInit {
   // Opciones de filtro
   filterOptions = [
     { value: 'all', label: 'Todos los contratos' },
-    { value: 'active', label: 'Contratos activos' },
-    { value: 'expiring', label: 'Contratos por vencer' },
-    { value: 'expired', label: 'Contratos vencidos' }
+    { value: 'Activos', label: 'Contratos activos' },
+    { value: 'Por vencer', label: 'Contratos por vencer' },
+    { value: 'Vencidos', label: 'Contratos vencidos' }
   ];
   
   // Opciones de ordenamiento
@@ -66,7 +66,7 @@ export class ListaContratosComponent implements OnInit {
   
   loadClients(): void {
     this.loading = true;
-    this.clientService.getClients().subscribe({
+    this.clientService.getClientes().subscribe({
       next: (data) => {
         this.allClients = data;
         this.applyFilters(); 
@@ -100,7 +100,7 @@ export class ListaContratosComponent implements OnInit {
 
     let filtered = this.contratos.filter(contrato => 
       (contrato.clientName || contrato.clienteNombre || '').toLowerCase().includes(searchTerm) ||
-      (contrato.description || contrato.descripcion || '').toLowerCase().includes(searchTerm) ||
+      (contrato.descripcion || contrato.descripcion || '').toLowerCase().includes(searchTerm) ||
       (contrato.numeroContrato || '').toLowerCase().includes(searchTerm)
     );
     if (filterType === 'active') {
@@ -114,16 +114,16 @@ export class ListaContratosComponent implements OnInit {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'clientAsc':
-          return (a.clientName || a.clienteNombre || '').localeCompare(b.clientName || b.clienteNombre || '');
+          return (a.clienteNombre || a.clienteNombre || '').localeCompare(b.clientName || b.clienteNombre || '');
         case 'clientDesc':
-          return (b.clientName || b.clienteNombre || '').localeCompare(a.clientName || a.clienteNombre || '');
+          return (b.clienteNombre || b.clienteNombre || '').localeCompare(a.clientName || a.clienteNombre || '');
         case 'dateAsc':
-          const dateA = a.expirationDate || a.fechaVencimiento;
-          const dateB = b.expirationDate || b.fechaVencimiento;
+          const dateA = a.creado || a.vencimiento;
+          const dateB = b.creado || b.vencimiento;
           return dateA && dateB ? new Date(dateA).getTime() - new Date(dateB).getTime() : 0;
         case 'dateDesc':
-          const dateC = a.expirationDate || a.fechaVencimiento;
-          const dateD = b.expirationDate || b.fechaVencimiento;
+          const dateC = a.creado || a.vencimiento;
+          const dateD = b.creado || b.vencimiento;
           return dateC && dateD ? new Date(dateD).getTime() - new Date(dateC).getTime() : 0;
         default:
           return 0;
@@ -182,7 +182,7 @@ export class ListaContratosComponent implements OnInit {
   getEstadoTexto(contrato: any): string {
     try {
       const hoy = new Date();
-      const fechaVencimientoStr = contrato.fechaVencimiento || contrato.expirationDate;
+      const fechaVencimientoStr = contrato.vencimiento || contrato.vencimiento;
       if (!fechaVencimientoStr) {
         return "Desconocido";
       }
