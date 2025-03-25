@@ -30,10 +30,13 @@ export class AppComponent {
   mostrarPdfViewer: boolean = false;
   errorArchivo = ""
   allClients: any[] = [];
+  filtroTipoContrato: number | null = null;
+  filtroPropietario: number | null = null;
   searchTerm: string = '';
   filterType: string = 'all';
   mostrarAlerta = false
   tiposContrato: any[] = []
+  servicio: any[] = []; 
   empresasPropietario: any[] = []
   tipoAlerta = "success"
   mensajeAlerta = ""
@@ -64,9 +67,14 @@ export class AppComponent {
     this.inicializarFormulario()
     this.cargarClientes()
     this.cargarContratos()
+    this.filtrarContratos()
+    this.cargarTiposContrato()
+    this.cargarEmpresasPropietario()
+    this.cargarTipoServicios()
 
     setTimeout(() => {
       this.depurarContratos()
+
     }, 2000)
   }
 
@@ -149,6 +157,18 @@ export class AppComponent {
     });
   }
 
+  cargarTipoServicios(): void {
+    this.contratoService.getTipoServicio().subscribe({
+      next: (data) => {
+        this.servicio = data;
+      },
+      error: (error) => {
+        console.error('Error al cargar tipos de contrato:', error);
+      }
+    });
+  }
+
+
   cargarEmpresasPropietario(): void {
     this.contratoService.getEmpresasPropietario().subscribe({
       next: (data) => {
@@ -159,7 +179,7 @@ export class AppComponent {
       }
     });
   }
-  
+
 
   editarContrato(id: string): void {
     this.cargando = true
@@ -260,29 +280,21 @@ export class AppComponent {
     }
 
     this.enviando = true
-
-    // Create FormData for sending data and file
     const formData = new FormData()
-
-    // Add contract data as JSON
     const contratoData = this.contratoForm.value
     console.log("Datos del contrato a enviar:", contratoData)
 
     formData.append("contratoData", JSON.stringify(contratoData))
-
-    // Add PDF file if it exists
     if (this.archivoSeleccionado) {
       formData.append("archivoPdf", this.archivoSeleccionado)
     }
 
     if (this.contratoSeleccionado && this.contratoSeleccionado._id) {
-      // Update existing contract - make sure we're using a string ID
       const id = this.contratoSeleccionado._id.toString()
       console.log("Actualizando contrato con ID:", id)
 
       this.contratoService.actualizarContrato(id, formData).subscribe({
         next: (contratoActualizado) => {
-          // Update the contract in the list
           const index = this.contratos.findIndex((c) => c._id === contratoActualizado._id)
           if (index !== -1) {
             this.contratos[index] = contratoActualizado
@@ -409,6 +421,8 @@ export class AppComponent {
     )
   }
 
+
+
   // Reemplazar la función getEstadoTexto con esta versión mejorada
   getEstadoTexto(contrato: any): string {
     try {
@@ -460,16 +474,16 @@ export class AppComponent {
   applyFilters(): void {
     // Filtrar por término de búsqueda
     let result = this.allClients;
-    
+
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      result = result.filter(client => 
+      result = result.filter(client =>
         (client.name || '').toLowerCase().includes(term) ||
         (client.email || '').toLowerCase().includes(term) ||
         (client.phone || '').toLowerCase().includes(term)
       );
     }
-    
+
     // Filtrar por tipo
     if (this.filterType !== 'all') {
       if (this.filterType === 'active') {
@@ -479,7 +493,7 @@ export class AppComponent {
       } else if (this.filterType === 'recent') {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
+
         result = result.filter(client => {
           if (!client.createdAt) return false;
           const createdAt = new Date(client.createdAt);
@@ -487,7 +501,7 @@ export class AppComponent {
         });
       }
     }
-    
+
     this.filteredClients = result;
   }
 
@@ -560,10 +574,9 @@ export class AppComponent {
   crearContrato(): void {
     if (
       !this.nuevoContrato.numeroContrato ||
-      !this.nuevoContrato.clienteId ||
       !this.nuevoContrato.tipoContrato ||
       !this.nuevoContrato.empresaPropietario ||
-      !this.nuevoContrato.servicio ||
+      this.nuevoContrato.servicio ||
       !this.nuevoContrato.creado ||
       !this.nuevoContrato.vencimiento ||
       !this.nuevoContrato.descripcion

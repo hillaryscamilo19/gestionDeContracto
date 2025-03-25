@@ -9,8 +9,8 @@ import { catchError, Observable, tap, throwError } from 'rxjs';
 export class ContractoService {
   private modalInstance: any;
 constructor(private http: HttpClient) {}
-  private apiUrl = "http://10.0.0.15:6970/api"
-  private fileUrl = 'http://10.0.0.15:6970/api/';
+  private apiUrl = "http://localhost:5210/api"
+  private fileUrl = 'http://localhost:5210/api';
 
   getContratos(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/Contrato`);
@@ -22,20 +22,20 @@ constructor(private http: HttpClient) {}
 
   crearContrato(contrato: any, archivo?: File): Observable<any> {
     const formData = new FormData();
-    
+
     Object.keys(contrato).forEach(key => {
       formData.append(key, contrato[key]);
     });
-    
+
     if (archivo) {
       formData.append('archivo', archivo, archivo.name);
     }
-    
+
     return this.http.post<any>(`${this.apiUrl}/Contrato/create`, formData);
   }
 
   getEmpresasPropietario(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/EmpresasPropietario`).pipe(
+    return this.http.get<any[]>(`${this.apiUrl}/Empresa`).pipe(
       catchError((error) => {
         console.error("Error al obtener empresas propietario:", error)
         return throwError(() => new Error("Error al cargar empresas propietario. Por favor intente nuevamente."))
@@ -43,9 +43,9 @@ constructor(private http: HttpClient) {}
     )
   }
 
-  // Implementación del método para obtener tipos de contrato
+
   getTiposContrato(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/TiposContrato`).pipe(
+    return this.http.get<any[]>(`${this.apiUrl}/TipoContratos`).pipe(
       catchError((error) => {
         console.error("Error al obtener tipos de contrato:", error)
         return throwError(() => new Error("Error al cargar tipos de contrato. Por favor intente nuevamente."))
@@ -53,18 +53,27 @@ constructor(private http: HttpClient) {}
     )
   }
 
+  getTipoServicio(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/Servicios`).pipe(
+      catchError((error) => {
+        console.error("Error al obtener tipos de Servicio:", error)
+        return throwError(() => new Error("Error al cargar tipos de Servicios. Por favor intente nuevamente."))
+      }),
+    )
+  }
+
 
   actualizarContrato(id: string | number, contrato: any, archivo?: File): Observable<any> {
     const formData = new FormData();
-    
+
     Object.keys(contrato).forEach(key => {
       formData.append(key, contrato[key]);
     });
-    
+
     if (archivo) {
       formData.append('archivo', archivo, archivo.name);
     }
-    
+
     return this.http.put<any>(`${this.apiUrl}/${id}`, formData);
   }
 

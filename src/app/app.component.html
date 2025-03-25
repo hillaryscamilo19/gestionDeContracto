@@ -15,6 +15,7 @@
     </div>
   </header>
 
+
   <main class="main">
     <router-outlet></router-outlet>
   </main>
@@ -23,10 +24,8 @@
     <div class="container">
       <p>&copy; {{ currentYear }} Registro De Contracto {{ 'By:Hillarys' }} </p>
     </div>
-
     <!-- Modal para crear contrato -->
-    <div class="modal fade" id="nuevoContratoModal" tabindex="-1" aria-labelledby="nuevoContratoModalLabel"
-      aria-hidden="true">
+    <div class="modal fade" id="nuevoContratoModal" tabindex="-1" aria-labelledby="nuevoContratoModalLabel">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -53,32 +52,36 @@
                   </select>
                 </div>
               </div>
-              <!-- Tipo de contrato y propietario (corregido) -->
+              <!-- Tipo de contrato y propietario-->
               <div class="row mb-3">
                 <div class="col-md-4">
                   <label for="tipoContrato" class="form-label">Tipo de Contrato *</label>
                   <select class="form-select" id="tipoContrato" name="tipoContrato"
-                    [(ngModel)]="nuevoContrato.tipoContrato" required>
-                    <option [ngValue]="null" disabled>Seleccionar</option>
-                    <option *ngFor="let tipo of tiposContrato" [ngValue]="tipo.id">{{ tipo.nombre }}</option>
-                  </select>
+                  [(ngModel)]="filtroTipoContrato" (change)="filtrarContratos()">
+                  <option [ngValue]="null" disabled selected>Seleccionar</option>
+                  <option *ngFor="let tipo of tiposContrato" [ngValue]="tipo.id">{{ tipo.descripcion }}</option>
+                </select>
                 </div>
                 <div class="col-md-4">
                   <label for="empresaPropietario" class="form-label">Propietario del Contrato *</label>
                   <select class="form-select" id="empresaPropietario" name="empresaPropietario"
-                    [(ngModel)]="nuevoContrato.empresaPropietario" required>
-                    <option [ngValue]="null" disabled>Seleccionar</option>
-                    <option *ngFor="let propietario of empresasPropietario" [ngValue]="propietario.id">{{ propietario.nombre }}</option>
-                  </select>
+                  [(ngModel)]="filtroPropietario" (change)="cargarTipoServicios()">
+                  <option [ngValue]="null" disabled selected>Seleccionar</option>
+                  <option *ngFor="let empresa of servicio || []" [ngValue]="empresa.id">{{ empresa.descripcion }}</option>
+
+                </select>
                 </div>
                 <div class="col-md-4">
-                  <label for="servicio" class="form-label">Tipo de Servicio *</label>
-                  <input type="text" id="servicio" name="servicio" class="form-control"
-                    [(ngModel)]="nuevoContrato.servicio" required>
+                  <label for="tiposServicios" class="form-label">Servicios</label>
+                  <select class="form-select" id="servicio" name="servicio"
+                  [(ngModel)]="servicio" (change)="filtrarContratos()">
+                  <option [ngValue]="null" disabled selected>Seleccionar</option>
+                  <option *ngFor="let empresa of servicio" [ngValue]="empresa.id">{{ empresa.descripcion }}</option>
+                </select>
                 </div>
               </div>
-              
-              
+
+
 
               <!-- Fechas -->
               <div class="row mb-3">

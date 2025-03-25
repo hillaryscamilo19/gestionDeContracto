@@ -44,6 +44,7 @@ import { PdfViewerModalComponent } from './component/ContractForm/contract-form/
     BrowserModule,
     FormsModule,
     DatePipe,
+    CommonModule,
     ReactiveFormsModule,
     HttpClientModule,
     CommonModule,

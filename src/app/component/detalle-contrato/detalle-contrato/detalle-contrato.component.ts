@@ -10,7 +10,8 @@ import { ContractoService } from 'src/app/services/contracto/contracto.service';
 @Component({
   selector: 'app-detalle-contrato',
   templateUrl: './detalle-contrato.component.html',
-  styleUrls: ['./detalle-contrato.component.css']
+  styleUrls: ['./detalle-contrato.component.css'],
+  providers: [DatePipe]
 })
 export class DetalleContratoComponent  implements OnInit{
 @Input() cargando: boolean = false;
@@ -118,23 +119,23 @@ archivoSeleccionado: File | null = null
 
   getEstadoTexto(contrato: any): string {
     if (!contrato) return '';
-    
+
     // Si el contrato ya tiene un estado definido, usarlo
     if (contrato.estado) return contrato.estado;
-    
+
     const hoy = new Date();
     const fechaVencimiento = new Date(contrato.vencimiento || contrato.expirationDate);
-    
+
     if (fechaVencimiento < hoy) {
       return 'Vencido';
     }
-    
+
     const diasRestantes = Math.ceil((fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (diasRestantes <= 30) {
       return 'Por vencer';
     }
-    
+
     return 'Activo';
   }
 
@@ -142,7 +143,7 @@ archivoSeleccionado: File | null = null
     if (!date || date === '0001-01-01T00:00:00') return 'No especificada';
     return this.datePipe.transform(date, 'dd/MM/yyyy') || '';
   }
-  
+
   tienePdf(): boolean {
     return this.contrato && this.contrato.archivos && this.contrato.archivos.length > 0;
   }
@@ -208,7 +209,7 @@ archivoSeleccionado: File | null = null
       });
     }
   }
-  
+
 
   verContrato(contrato: any): void {
     this.contratoSeleccionado = contrato
@@ -303,7 +304,7 @@ archivoSeleccionado: File | null = null
   descargarPdf(id: string, nombreCliente: string): void {
     const contrato = this.contrato;
     if (!contrato || !contrato.archivos || contrato.archivos.length === 0) return;
-    
+
     const archivo = contrato.archivos[0]; // Tomamos el primer archivo
     this.contratoService.descargarPdf(archivo.storedFileName, nombreCliente);
   }

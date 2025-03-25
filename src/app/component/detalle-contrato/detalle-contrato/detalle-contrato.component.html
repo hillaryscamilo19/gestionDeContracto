@@ -75,7 +75,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let contrato of filtrarPorEstado('Activo')" class="table-success">
+          <tr *ngFor="let contrato of filtrarPorEstado('activo')" class="table-success">
             <td>{{ contrato.clientName || contrato.clienteNombre }}</td>
             <td>{{ getContractTypeName(contrato.tipoContrato) }}</td>
             <td>{{ getOwnerName(contrato.empresaPropietario) }}</td>
@@ -385,10 +385,10 @@
             </div>
 
             <div class="col-md-6">
-              <label for="contractNumber" class="form-label">Número de Contrato *</label>
-              <input type="text" id="contractNumber" formControlName="contractNumber" class="form-control"
-                [ngClass]="{'is-invalid': contratoForm.get('contractNumber')?.invalid && contratoForm.get('contractNumber')?.touched}">
-              <div *ngIf="contratoForm.get('contractNumber')?.invalid && contratoForm.get('contractNumber')?.touched"
+              <label for="numeroContrato" class="form-label">Número de Contrato *</label>
+              <input type="text" id="numeroContrato" formControlName="numeroContrato" class="form-control"
+                [ngClass]="{'is-invalid': contratoForm.get('numeroContrato')?.invalid && contratoForm.get('numeroContrato')?.touched}">
+              <div *ngIf="contratoForm.get('numeroContrato')?.invalid && contratoForm.get('numeroContrato')?.touched"
                 class="invalid-feedback">
                 El número de contrato es requerido
               </div>
@@ -397,39 +397,39 @@
 
           <div class="row mb-3">
             <div class="col-md-4">
-              <label for="contractType" class="form-label">Tipo de Contrato *</label>
-              <select id="contractType" formControlName="contractType" class="form-select"
-                [ngClass]="{'is-invalid': contratoForm.get('contractType')?.invalid && contratoForm.get('contractType')?.touched}">
+              <label for="tipoContrato" class="form-label">Tipo de Contrato *</label>
+              <select id="tipoContrato" formControlName="tipoContrato" class="form-select"
+                [ngClass]="{'is-invalid': contratoForm.get('tipoContrato')?.invalid && contratoForm.get('tipoContrato')?.touched}">
                 <option value="local">Local</option>
                 <option value="internacional">Internacional</option>
                 <option value="aseguradora">Aseguradora</option>
               </select>
-              <div *ngIf="contratoForm.get('contractType')?.invalid && contratoForm.get('contractType')?.touched"
+              <div *ngIf="contratoForm.get('tipoContrato')?.invalid && contratoForm.get('tipoContrato')?.touched"
                 class="invalid-feedback">
                 Debe seleccionar un tipo de contrato
               </div>
             </div>
 
             <div class="col-md-4">
-              <label for="owner" class="form-label">Propietario *</label>
-              <select id="owner" formControlName="owner" class="form-select"
-                [ngClass]="{'is-invalid': contratoForm.get('owner')?.invalid && contratoForm.get('owner')?.touched}">
+              <label for="empresaPropietario" class="form-label">Propietario *</label>
+              <select id="empresaPropietario" formControlName="empresaPropietario" class="form-select"
+                [ngClass]="{'is-invalid': contratoForm.get('empresaPropietario')?.invalid && contratoForm.get('empresaPropietario')?.touched}">
                 <option value="ssv">SSV</option>
                 <option value="klarida">Klarida</option>
                 <option value="abrah">Abrah</option>
                 <option value="softexpert">Softexpert</option>
               </select>
-              <div *ngIf="contratoForm.get('owner')?.invalid && contratoForm.get('owner')?.touched"
+              <div *ngIf="contratoForm.get('empresaPropietario')?.invalid && contratoForm.get('empresaPropietario')?.touched"
                 class="invalid-feedback">
                 Debe seleccionar un propietario
               </div>
             </div>
 
             <div class="col-md-4">
-              <label for="serviceType" class="form-label">Tipo de Servicio *</label>
-              <input type="text" id="serviceType" formControlName="serviceType" class="form-control"
-                [ngClass]="{'is-invalid': contratoForm.get('serviceType')?.invalid && contratoForm.get('serviceType')?.touched}">
-              <div *ngIf="contratoForm.get('serviceType')?.invalid && contratoForm.get('serviceType')?.touched"
+              <label for="servicio" class="form-label">Tipo de Servicio *</label>
+              <input type="text" id="servicio" formControlName="servicio" class="form-control"
+                [ngClass]="{'is-invalid': contratoForm.get('servicio')?.invalid && contratoForm.get('servicio')?.touched}">
+              <div *ngIf="contratoForm.get('servicio')?.invalid && contratoForm.get('servicio')?.touched"
                 class="invalid-feedback">
                 El tipo de servicio es requerido
               </div>
@@ -438,20 +438,20 @@
 
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="startDate" class="form-label">Fecha de Inicio *</label>
-              <input type="date" id="startDate" formControlName="startDate" class="form-control"
-                [ngClass]="{'is-invalid': contratoForm.get('startDate')?.invalid && contratoForm.get('startDate')?.touched}">
-              <div *ngIf="contratoForm.get('startDate')?.invalid && contratoForm.get('startDate')?.touched"
+              <label for="creado" class="form-label">Fecha de Inicio *</label>
+              <input type="date" id="creado" formControlName="creado" class="form-control"
+                [ngClass]="{'is-invalid': contratoForm.get('creado')?.invalid && contratoForm.get('creado')?.touched}">
+              <div *ngIf="contratoForm.get('creado')?.invalid && contratoForm.get('creado')?.touched"
                 class="invalid-feedback">
                 La fecha de inicio es requerida
               </div>
             </div>
 
             <div class="col-md-6">
-              <label for="expirationDate" class="form-label">Fecha de Vencimiento *</label>
-              <input type="date" id="expirationDate" formControlName="expirationDate" class="form-control"
-                [ngClass]="{'is-invalid': contratoForm.get('expirationDate')?.invalid && contratoForm.get('expirationDate')?.touched}">
-              <div *ngIf="contratoForm.get('expirationDate')?.invalid && contratoForm.get('expirationDate')?.touched"
+              <label for="vencimiento" class="form-label">Fecha de Vencimiento *</label>
+              <input type="date" id="vencimiento" formControlName="vencimiento" class="form-control"
+                [ngClass]="{'is-invalid': contratoForm.get('vencimiento')?.invalid && contratoForm.get('vencimiento')?.touched}">
+              <div *ngIf="contratoForm.get('vencimiento')?.invalid && contratoForm.get('vencimiento')?.touched"
                 class="invalid-feedback">
                 La fecha de vencimiento es requerida
               </div>
@@ -459,10 +459,10 @@
           </div>
 
           <div class="mb-3">
-            <label for="description" class="form-label">Descripción *</label>
-            <textarea id="description" formControlName="description" class="form-control" rows="3"
-              [ngClass]="{'is-invalid': contratoForm.get('description')?.invalid && contratoForm.get('description')?.touched}"></textarea>
-            <div *ngIf="contratoForm.get('description')?.invalid && contratoForm.get('description')?.touched"
+            <label for="descripcion" class="form-label">Descripción *</label>
+            <textarea id="descripcion" formControlName="descripcion" class="form-control" rows="3"
+              [ngClass]="{'is-invalid': contratoForm.get('descripcion')?.invalid && contratoForm.get('descripcion')?.touched}"></textarea>
+            <div *ngIf="contratoForm.get('descripcion')?.invalid && contratoForm.get('descripcion')?.touched"
               class="invalid-feedback">
               La descripción es requerida
             </div>
