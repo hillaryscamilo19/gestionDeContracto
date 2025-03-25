@@ -36,23 +36,23 @@ export class AppComponent {
   filterType: string = 'all';
   mostrarAlerta = false
   tiposContrato: any[] = []
-  servicio: any[] = []; 
+  servicio: any[] = [];
   empresasPropietario: any[] = []
   tipoAlerta = "success"
   mensajeAlerta = ""
   private modalRef: any
   pdfSrc: string | ArrayBuffer | SafeResourceUrl | null = null;
-  nuevoContrato: any = {
-    numeroContrato: '',
-    clienteId: null,
-    tipoContrato: null,
-    empresaPropietario: null,
-    servicio: '',
-    creado: this.formatDateForInput(new Date()),
-    vencimiento: '',
-    descripcion: '',
-    estado: 'Activo'
-  };
+  // En tu componente
+nuevoContrato: any = {
+  numeroContrato: '',
+  clienteId: null,
+  tipoContrato: null,
+  empresaPropietario: null,
+  servicio: null,
+  creado: new Date().toISOString().split('T')[0], // Fecha actual en formato YYYY-MM-DD
+  vencimiento: '', // Puedes establecer una fecha predeterminada si lo deseas
+  descripcion: ''
+};
   currentYear: any;
 
 
@@ -146,17 +146,32 @@ export class AppComponent {
     this.limpiarArchivo()
   }
 
+  // Agrega un método para manejar el cambio en el selector
+onTipoContratoChange(event: any): void {
+  console.log('Tipo de contrato seleccionado:', event.target.value);
+  this.nuevoContrato.tipoContrato = event.target.value;
+}
+
   cargarTiposContrato(): void {
+    // Si los tipos de contrato se cargan desde el servidor
     this.contratoService.getTiposContrato().subscribe({
       next: (data) => {
         this.tiposContrato = data;
+        console.log('Tipos de contrato cargados:', this.tiposContrato);
       },
       error: (error) => {
         console.error('Error al cargar tipos de contrato:', error);
       }
     });
-  }
 
+    // O si son estáticos
+    this.tiposContrato = [
+      { id: 'local', descripcion: 'Local' },
+      { id: 'internacional', descripcion: 'Internacional' },
+      { id: 'aseguradora', descripcion: 'Aseguradora' }
+    ];
+    console.log('Tipos de contrato cargados:', this.tiposContrato);
+  }
   cargarTipoServicios(): void {
     this.contratoService.getTipoServicio().subscribe({
       next: (data) => {
@@ -570,45 +585,87 @@ export class AppComponent {
   }
 
 
-
   crearContrato(): void {
-    if (
-      !this.nuevoContrato.numeroContrato ||
-      !this.nuevoContrato.tipoContrato ||
-      !this.nuevoContrato.empresaPropietario ||
-      this.nuevoContrato.servicio ||
-      !this.nuevoContrato.creado ||
-      !this.nuevoContrato.vencimiento ||
-      !this.nuevoContrato.descripcion
-    ) {
-      alert("Por favor complete todos los campos requeridos")
-      return
+    // Validar que todos los campos requeridos estén completos
+    if (!this.nuevoContrato.numeroContrato ||
+        !this.nuevoContrato.clienteId ||
+        !this.nuevoContrato.tipoContrato ||
+        !this.nuevoContrato.empresaPropietario ||
+        !this.nuevoContrato.servicio ||
+        !this.nuevoContrato.creado ||
+        !this.nuevoContrato.vencimiento ||
+        !this.nuevoContrato.descripcion) {
+
+      // Mostrar mensaje de error
+      this.mostrarMensaje('danger', 'Por favor complete todos los campos obligatorios');
+
+      // Marcar visualmente los campos faltantes
+      const camposFaltantes = [];
+      if (!this.nuevoContrato.numeroContrato) camposFaltantes.push('Número de Contrato');
+      if (!this.nuevoContrato.clienteId) camposFaltantes.push('Cliente');
+      if (!this.nuevoContrato.tipoContrato) camposFaltantes.push('Tipo de Contrato');
+      if (!this.nuevoContrato.empresaPropietario) camposFaltantes.push('Propietario');
+      if (!this.nuevoContrato.servicio) camposFaltantes.push('Servicio');
+      if (!this.nuevoContrato.creado) camposFaltantes.push('Fecha de Creación');
+      if (!this.nuevoContrato.vencimiento) camposFaltantes.push('Fecha de Vencimiento');
+      if (!this.nuevoContrato.descripcion) camposFaltantes.push('Descripción');
+
+      console.log('Campos faltantes:', camposFaltantes);
+      return;
     }
+
+    // Validar que se haya seleccionado un archivo PDF si es requerido
     if (!this.archivoSeleccionado) {
-      alert("Por favor adjunte un archivo PDF del contrato")
-      return
+      this.mostrarMensaje('danger', 'Debe adjuntar un archivo PDF');
+      return;
     }
-    this.enviando = true
-    this.contratoService.crearContrato(this.nuevoContrato, this.archivoSeleccionado).subscribe({
+
+    // Continuar con el envío del formulario
+    this.enviarFormulario();
+  }
+
+  enviarFormulario(): void {
+    this.enviando = true;
+
+    // Crear FormData para enviar el archivo junto con los datos
+    const formData = new FormData();
+
+    // Agregar todos los campos del contrato
+    Object.keys(this.nuevoContrato).forEach(key => {
+      formData.append(key, this.nuevoContrato[key]);
+    });
+
+    // Agregar el archivo PDF
+    if (this.archivoSeleccionado) {
+      formData.append('archivoPdf', this.archivoSeleccionado, this.archivoSeleccionado.name);
+    }
+
+    // Imprimir el contenido del FormData para depuración
+
+
+    // Enviar al servidor
+    this.contratoService.crearContrato(formData).subscribe({
       next: (response) => {
-        console.log("Contrato creado exitosamente:", response)
-        this.enviando = false
-        const modalElement = document.getElementById("nuevoContratoModal")
-        if (modalElement) {
-          const modal = bootstrap.Modal.getInstance(modalElement)
-          if (modal) {
-            modal.hide()
-          }
+        console.log('Contrato creado exitosamente:', response);
+        this.mostrarMensaje('success', 'Contrato creado exitosamente');
+        this.resetearFormulario();
+        this.cerrarModal();
+        this.cargarContratos(); // Recargar la lista de contratos
+      },
+      error: (error) => {
+        console.error('Error al crear contrato:', error);
+
+        // Mostrar mensaje de error específico si está disponible
+        if (error.error && error.error.message) {
+          this.mostrarMensaje('danger', `Error: ${error.error.message}`);
+        } else {
+          this.mostrarMensaje('danger', 'Error al crear el contrato. Por favor intente nuevamente.');
         }
-        this.cargarContratos()
-        this.resetearFormulario()
       },
-      error: (error: any) => {
-        console.error("Error al crear contrato:", error)
-        this.enviando = false
-        alert("Error al crear el contrato. Por favor intente nuevamente.")
-      },
-    })
+      complete: () => {
+        this.enviando = false;
+      }
+    });
   }
 
   formatDateForInput(date: Date): string {

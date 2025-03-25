@@ -34,6 +34,7 @@ constructor(private http: HttpClient) {}
     return this.http.post<any>(`${this.apiUrl}/Contrato/create`, formData);
   }
 
+
   getEmpresasPropietario(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/Empresa`).pipe(
       catchError((error) => {

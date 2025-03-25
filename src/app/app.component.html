@@ -57,27 +57,28 @@
                 <div class="col-md-4">
                   <label for="tipoContrato" class="form-label">Tipo de Contrato *</label>
                   <select class="form-select" id="tipoContrato" name="tipoContrato"
-                  [(ngModel)]="filtroTipoContrato" (change)="filtrarContratos()">
-                  <option [ngValue]="null" disabled selected>Seleccionar</option>
-                  <option *ngFor="let tipo of tiposContrato" [ngValue]="tipo.id">{{ tipo.descripcion }}</option>
-                </select>
+                    [(ngModel)]="nuevoContrato.tipoContrato" (change)="onTipoContratoChange($event)" required>
+                    <option [ngValue]="null" disabled selected>Seleccionar</option>
+                    <option *ngFor="let tipo of tiposContrato" [ngValue]="tipo.id">{{ tipo.descripcion }}</option>
+                  </select>
                 </div>
                 <div class="col-md-4">
                   <label for="empresaPropietario" class="form-label">Propietario del Contrato *</label>
                   <select class="form-select" id="empresaPropietario" name="empresaPropietario"
-                  [(ngModel)]="filtroPropietario" (change)="cargarTipoServicios()">
-                  <option [ngValue]="null" disabled selected>Seleccionar</option>
-                  <option *ngFor="let empresa of servicio || []" [ngValue]="empresa.id">{{ empresa.descripcion }}</option>
-
-                </select>
+                    [(ngModel)]="nuevoContrato.empresaPropietario" (change)="cargarTipoServicios()" required>
+                    <option [ngValue]="null" disabled selected>Seleccionar</option>
+                    <option *ngFor="let empresa of empresasPropietario" [ngValue]="empresa.id">{{ empresa.descripcion }}
+                    </option>
+                  </select>
                 </div>
                 <div class="col-md-4">
                   <label for="tiposServicios" class="form-label">Servicios</label>
-                  <select class="form-select" id="servicio" name="servicio"
-                  [(ngModel)]="servicio" (change)="filtrarContratos()">
-                  <option [ngValue]="null" disabled selected>Seleccionar</option>
-                  <option *ngFor="let empresa of servicio" [ngValue]="empresa.id">{{ empresa.descripcion }}</option>
-                </select>
+                  <select class="form-select" id="servicio" name="servicio" [(ngModel)]="nuevoContrato.servicio"
+                    required>
+                    <option [ngValue]="null" disabled selected>Seleccionar</option>
+                    <option *ngFor="let tipoServicio of servicio" [ngValue]="tipoServicio.id">{{
+                      tipoServicio.descripcion }}</option>
+                  </select>
                 </div>
               </div>
 
@@ -123,6 +124,7 @@
               <div *ngIf="pdfSrc" class="mb-3">
                 <label class="form-label">Vista previa del PDF:</label>
                 <div class="pdf-preview-container" style="height: 300px; overflow: auto; border: 1px solid #ddd;">
+                  <!-- Problema: Falta el corchete en src -->
                   <pdf-viewer src="pdfSrc" [render-text]="true" [original-size]="false" [show-all]="true"
                     [fit-to-page]="true" style="height: 100%;">
                   </pdf-viewer>
