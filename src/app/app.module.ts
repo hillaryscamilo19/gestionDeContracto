@@ -58,7 +58,7 @@ import { PdfViewerModalComponent } from './component/ContractForm/contract-form/
       { path: 'contrato', component: ContractFormComponent},
       { path: 'nuevo-contrato', component: FormularioContratoComponent },
       { path: 'editar-contrato/:id', component: FormularioContratoComponent },
-      { path: 'detalle-contrato/:id', component: DetalleContratoComponent },
+      { path: 'contratos/detalle-contrato/:id', component: DetalleContratoComponent },
       { path: 'configuracion', component: ConfiguracionNotificacionesComponent },
       { path: "**", redirectTo: "/contratos" }
     ])

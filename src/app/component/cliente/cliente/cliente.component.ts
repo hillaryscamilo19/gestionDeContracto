@@ -1,13 +1,13 @@
-import  { HttpClient } from "@angular/common/http"
-import { Component,  OnInit } from "@angular/core"
+import { HttpClient } from "@angular/common/http"
+import { Component, OnInit } from "@angular/core"
 // Cambia la importación de type-only a una importación regular
-import {  FormGroup, Validators } from "@angular/forms"
+import { FormGroup, Validators } from "@angular/forms"
 import { throwError } from "rxjs"
 import { Observable } from "rxjs/internal/Observable"
-import  { Client } from "src/app/models/contract/contract.module"
-import  { ClienteService } from "src/app/services/Cliente/cliente.service"
+import { Client } from "src/app/models/contract/contract.module"
+import { ClienteService } from "src/app/services/Cliente/cliente.service"
 import * as bootstrap from "bootstrap"
-import {  FormBuilder } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 
 
 
@@ -36,11 +36,11 @@ export class ClienteComponent implements OnInit {
   modalInstance: any = null
 
   constructor(
-    private fb: FormBuilder , private clientService: ClienteService, private http: HttpClient,
+    private fb: FormBuilder, private clientService: ClienteService, private http: HttpClient,
   ) {
     this.clientForm = this.fb.group({
       name: ["", Validators.required],
-      LastName: ["", Validators.required], 
+      LastName: ["", Validators.required],
       email: ["", [Validators.required, Validators.email]],
       phone: [""],
       Documento_Identidad: [""],
@@ -132,15 +132,15 @@ export class ClienteComponent implements OnInit {
     this.applyFilters()
   }
 
-  // Implementación del método openForm
+
   openForm(): void {
-    // Resetear el formulario y el cliente seleccionado
+
     this.resetForm()
 
-    // Inicializar el formulario con valores vacíos
+
     this.clientForm.patchValue({
       name: "",
-      LastName: "", // Asegúrate de que coincida con el nombre del control
+      LastName: "",
       email: "",
       phone: "",
       Documento_Identidad: "",
@@ -148,7 +148,7 @@ export class ClienteComponent implements OnInit {
       contactPerson: "",
     })
 
-    // El modal se abrirá automáticamente por el atributo data-bs-toggle="modal" data-bs-target="#clientModal"
+
   }
 
   createClient(client: Client): Observable<Client> {
@@ -160,7 +160,7 @@ export class ClienteComponent implements OnInit {
       this.clientService.deleteClient(id).subscribe({
         next: () => {
           this.clients = this.clients.filter((c) => c._id !== id)
-          this.loadClients() // Recargar la lista después de eliminar
+          this.loadClients() 
           this.showMessage("success", "Cliente eliminado correctamente")
         },
         error: (error) => {
@@ -179,17 +179,17 @@ export class ClienteComponent implements OnInit {
   }
 
   editClient(client: Client): void {
-    this.selectedClient = { ...client } // Crear una copia para evitar modificar el original
+    this.selectedClient = { ...client } 
     this.clientForm.patchValue({
       name: client.Name,
-      LastName: client.LastName, // Asegúrate de que coincida con el nombre del control
+      LastName: client.LastName, 
       email: client.Email,
       phone: client.phone || "",
       address: client.Address || "",
       Documento_Identidad: client.Documento_Identidad || "",
     })
 
-    // Abrir el modal
+
     const modalElement = document.getElementById("clientModal")
     if (modalElement) {
       this.modalInstance = new bootstrap.Modal(modalElement)
@@ -217,7 +217,7 @@ export class ClienteComponent implements OnInit {
           }
           this.showMessage("success", "Cliente actualizado correctamente")
           this.resetForm()
-          this.loadClients() 
+          this.loadClients()
           this.cerrarModal()
         },
         error: (error) => {
@@ -232,7 +232,7 @@ export class ClienteComponent implements OnInit {
           this.clients.push(newClient)
           this.showMessage("success", "Cliente creado correctamente")
           this.resetForm()
-          this.loadClients() 
+          this.loadClients()
           this.cerrarModal()
         },
         error: (error) => {

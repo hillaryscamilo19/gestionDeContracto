@@ -1,8 +1,11 @@
 import { DatePipe } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
 import { Modal } from 'bootstrap';
+import { Observable } from 'rxjs';
 import { ContractModule } from 'src/app/models/contract/contract.module';
 import { ClienteService } from 'src/app/services/Cliente/cliente.service';
 import { ContractoService } from 'src/app/services/contracto/contracto.service';
@@ -23,6 +26,12 @@ estadoSeleccionado = "Activo"
 fechaActual: Date = new Date()
 fechaVencimiento: Date = new Date()
 mostrarAlerta = false
+contratoId = ""
+// Propiedades para el visor de PDF
+mostrarPdfViewer = false
+cargandoPdf = false
+Array = Array
+pdfSrc: SafeResourceUrl | null = null
 tipoAlerta = "success"
 mensajeAlerta = ""
 diasRestantes = 0
@@ -38,19 +47,23 @@ enviando = false
 errorArchivo = ""
 nombreArchivo = ""
 archivoSeleccionado: File | null = null
-  route: any;
+  private apiUrl = "https://localhost:7299/api"
 
   constructor(
+
     private fb: FormBuilder,
-    private contratoService: ContractoService,
+    public contratoService: ContractoService,
     private clientService: ClienteService,
     private datePipe: DatePipe,
+    private http: HttpClient,
+    private sanitizer: DomSanitizer,
+    private route: ActivatedRoute
   ) {
     this.contratoForm = this.fb.group({
       clientId: ["", Validators.required],
       clienteNombre: ["", Validators.required],
-      numeroContrato: ["", Validators.required],
-      descripcion: ["", Validators.required],
+      NumeroContrato: ["", Validators.required],
+      Descripcion: ["", Validators.required],
       creado: [new Date().toISOString().substring(0, 10), Validators.required],
       vencimiento: ["", Validators.required],
       tipoContrato: ["local", Validators.required],
@@ -60,36 +73,33 @@ archivoSeleccionado: File | null = null
   }
 
   ngOnInit(): void {
-    this.id = this.route.snapshot.params["id"]
-    this.obtenerContrato()
-    this.cargarContrato()
+    this.route.params.subscribe((params) => {
+      // Verificar que el ID existe y no es ':id'
+      if (params["id"] && params["id"] !== ":id") {
+        this.contratoId = params["id"]
+        console.log("ID del contrato extraído de la ruta:", this.contratoId)
+        this.cargarContratos()
+      } else {
+        console.error("ID de contrato no válido en la ruta:", params)
+        alert("Error: ID de contrato no válido")
+      }
+    })
+    this.cargarContratos()
     this.cargarClientes()
   }
 
-  obtenerContrato(): void {
-    this.contratoService.getContrato(this.id.toString()).subscribe(
-      (data: ContractModule) => {
-        this.contrato = data
-        this.contratoOriginal = { ...data }
-        this.fechaVencimiento = new Date(this.contrato.expirationDate)
-        this.diasRestantes = this.calcularDiasRestantes(this.fechaVencimiento)
-      },
-      (err: HttpErrorResponse) => {
-        console.error(err)
-      },
-    )
-  }
-
-  cargarContrato(): void {
-    this.contratoService.getContrato(this.id).subscribe({
+  cargarContratos(): void {
+    this.contratoService.getContratos().subscribe({
       next: (data) => {
-        this.contrato = data;
+        this.contratos = data
+        console.log("Contratos cargados:", this.contratos)
       },
       error: (error) => {
-        console.error('Error al cargar contrato:', error);
-      }
-    });
+        console.error("Error al cargar contratos:", error)
+      },
+    })
   }
+
 
   cargarClientes(): void {
     this.clientService.getClientes().subscribe(
@@ -101,6 +111,14 @@ archivoSeleccionado: File | null = null
       },
     )
   }
+
+
+
+    cerrarVisualizador(): void {
+      this.mostrarPdfViewer = false
+      this.pdfSrc = null
+    }
+  
 
   abrirFormulario(): void {
     this.contratoSeleccionado = null
@@ -118,25 +136,42 @@ archivoSeleccionado: File | null = null
   }
 
   getEstadoTexto(contrato: any): string {
-    if (!contrato) return '';
-
-    // Si el contrato ya tiene un estado definido, usarlo
-    if (contrato.estado) return contrato.estado;
-
-    const hoy = new Date();
-    const fechaVencimiento = new Date(contrato.vencimiento || contrato.expirationDate);
-
-    if (fechaVencimiento < hoy) {
-      return 'Vencido';
+    try {
+      const hoy = new Date()
+      const fechaVencimientoStr = contrato.fechaVencimiento || contrato.vencimiento
+      if (!fechaVencimientoStr) {
+        console.error("Contrato sin fecha de vencimiento:", contrato)
+        return "Desconocido"
+      }
+      const fechaVencimiento = new Date(fechaVencimientoStr)
+      // Calcular días restantes
+      const diasRestantes = Math.ceil((fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
+      if (diasRestantes < 0) {
+        return "Vencido"
+      } else if (diasRestantes <= 30) {
+        return "ProximoAvencer"
+      } else {
+        return "Activo"
+      }
+    } catch (error) {
+      console.error("Error al calcular estado del contrato:", error, contrato)
+      return "Desconocido"
     }
+  }
 
-    const diasRestantes = Math.ceil((fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
 
-    if (diasRestantes <= 30) {
-      return 'Por vencer';
+  getEstadoClase(contrato: any): string {
+    const estado = this.getEstadoTexto(contrato)
+    switch (estado) {
+      case "Vencido":
+        return "bg-danger"
+      case "ProximoAvencer":
+        return "bg-warning text-dark"
+      case "Activo":
+        return "bg-success"
+      default:
+        return "bg-secondary"
     }
-
-    return 'Activo';
   }
 
   formatDate(date: string): string {
@@ -144,10 +179,9 @@ archivoSeleccionado: File | null = null
     return this.datePipe.transform(date, 'dd/MM/yyyy') || '';
   }
 
-  tienePdf(): boolean {
-    return this.contrato && this.contrato.archivos && this.contrato.archivos.length > 0;
+  tienePdf(contrato: any): boolean {
+    return this.contratoService.tienePdf(contrato)
   }
-
 
   ordenarContratosPorEstado(): void {
     this.contratos.sort((a, b) => {
@@ -260,29 +294,36 @@ archivoSeleccionado: File | null = null
   }
 
   onFileSelected(event: any): void {
-    const file = event.target.files[0]
-    if (file) {
-      // Verificar que sea un PDF
-      if (file.type !== "application/pdf") {
-        this.errorArchivo = "Solo se permiten archivos PDF"
-        this.archivoSeleccionado = null
-        this.nombreArchivo = ""
-        return
+    // Verifica si el evento tiene un archivo asociado
+    if (event.target && event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+  
+      if (file) {
+        // Verificar que sea un PDF
+        if (file.type !== "application/pdf") {
+          this.errorArchivo = "Solo se permiten archivos PDF";
+          this.archivoSeleccionado = null;
+          this.nombreArchivo = "";
+          return;
+        }
+  
+        // Verificar tamaño (máximo 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          this.errorArchivo = "El archivo no debe superar los 5MB";
+          this.archivoSeleccionado = null;
+          this.nombreArchivo = "";
+          return;
+        }
+  
+        this.archivoSeleccionado = file;
+        this.nombreArchivo = file.name;
+        this.errorArchivo = "";
       }
-
-      // Verificar tamaño (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        this.errorArchivo = "El archivo no debe superar los 5MB"
-        this.archivoSeleccionado = null
-        this.nombreArchivo = ""
-        return
-      }
-
-      this.archivoSeleccionado = file
-      this.nombreArchivo = file.name
-      this.errorArchivo = ""
+    } else {
+      console.error("No se seleccionó un archivo válido.");
     }
   }
+  
 
   limpiarArchivo(): void {
     this.archivoSeleccionado = null
@@ -300,25 +341,98 @@ archivoSeleccionado: File | null = null
   filtrarPorEstado(estado: string): any[] {
     return this.contratos.filter((contrato) => this.getEstadoTexto(contrato) === estado)
   }
+  
+  visualizarPdf(id: string | number): void {
+    if (!id) {
+      console.error("No se pudo determinar el ID del contrato");
+      alert("Error: No se pudo determinar el ID del contrato");
+      return;
+    }
+  
+    console.log("Visualizando PDF para contrato ID:", id);
+    this.cargandoPdf = true;
+    this.mostrarPdfViewer = true;
+  
+    this.contratoService.obtenerPdfBlob(id).subscribe({
+      next: (blob) => {
+        // Crear URL del blob
+        const url = window.URL.createObjectURL(blob);
+        this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);  // Esto es para Angular
+        this.cargandoPdf = false;
+      },
+      error: (error) => {
+        console.error("Error al obtener el PDF:", error);
+        this.cargandoPdf = false;
+        this.mostrarPdfViewer = false;
+        alert("Error al visualizar el PDF. Por favor intente nuevamente.");
+      },
+    });
+  }
+  
+  
 
-  descargarPdf(id: string, nombreCliente: string): void {
-    const contrato = this.contrato;
-    if (!contrato || !contrato.archivos || contrato.archivos.length === 0) return;
-
-    const archivo = contrato.archivos[0]; // Tomamos el primer archivo
-    this.contratoService.descargarPdf(archivo.storedFileName, nombreCliente);
+  obtenerPdfBlob(id: string | number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/Archivos/ver/${id}`, {
+      responseType: 'blob',
+    });
   }
 
+  descargarPdf(id: string | number, nombreCliente: string): void {
+    if (!id) {
+      console.error("No se encontró un archivo para descargar.");
+      alert("No se encontró un archivo para descargar.");
+      return;
+    }
+  
+    console.log("Descargando PDF con ID:", id);
+  
+    this.obtenerPdfBlob(id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `Contrato_${nombreCliente || "Descarga"}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error("Error al descargar PDF:", error);
+        alert("Error al descargar el PDF. Por favor intente nuevamente.");
+      },
+    });
+  }
+  
+  getArchivoId(contrato: any): number | null {
+    if (!contrato) {
+      console.error("Contrato no definido.");
+      return null;
+    }
+  
+    if (!Array.isArray(contrato.archivos)) {
+      console.error("El contrato no tiene un array de archivos:", contrato.archivos);
+      return null;
+    }
+  
+    if (contrato.archivos.length === 0) {
+      console.error("El contrato no tiene archivos.");
+      return null;
+    }
+  
+    console.log("Archivo encontrado:", contrato.archivos[0]);
+    return contrato.archivos[0].id; // Extrae el ID del primer archivo
+  }
+  
+  
+  
   verContratoAnterior(contrato: any): void {
     if (contrato.previousContractPath) {
       window.open(contrato.previousContractPath, "_blank")
     } else {
-      this.mostrarModal = true
-      this.mensajeAlerta = "No hay contrato anterior disponible"
-      this.esExitoso = false
+      alert("No hay contrato anterior disponible")
     }
   }
-
 
   onUpdate(): void {
     // Formatea la fecha antes de enviarla al backend
@@ -332,15 +446,15 @@ archivoSeleccionado: File | null = null
         this.mostrarModal = true
         this.mensajeAlerta = "Contrato actualizado exitosamente."
         this.esExitoso = true
-        this.cargarContrato()
-        this.obtenerContrato()
+        this.cargarContratos()
+  
       },
       (err: any) => {
         this.mostrarModal = true
         this.mensajeAlerta = "Error al actualizar el contrato."
         this.esExitoso = false
         this.contrato = { ...this.contratoOriginal }
-        this.obtenerContrato()
+    
       },
     )
   }
@@ -415,6 +529,6 @@ archivoSeleccionado: File | null = null
 
   cancelarEdicion(): void {
     this.contrato = { ...this.contratoOriginal }
-    this.obtenerContrato()
+
   }
 }

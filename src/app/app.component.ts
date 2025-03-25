@@ -37,7 +37,7 @@ export class AppComponent {
   mostrarAlerta = false
   tiposContrato: any[] = []
   servicio: any[] = [];
-  empresasPropietario: any[] = []
+  empresaPropietario: any[] = []
   tipoAlerta = "success"
   mensajeAlerta = ""
   private modalRef: any
@@ -50,7 +50,7 @@ nuevoContrato: any = {
   empresaPropietario: null,
   servicio: null,
   creado: new Date().toISOString().split('T')[0], // Fecha actual en formato YYYY-MM-DD
-  vencimiento: '', // Puedes establecer una fecha predeterminada si lo deseas
+  vencimiento: '', 
   descripcion: ''
 };
   currentYear: any;
@@ -187,7 +187,7 @@ onTipoContratoChange(event: any): void {
   cargarEmpresasPropietario(): void {
     this.contratoService.getEmpresasPropietario().subscribe({
       next: (data) => {
-        this.empresasPropietario = data;
+        this.empresaPropietario = data;
       },
       error: (error) => {
         console.error('Error al cargar empresas propietario:', error);
@@ -594,7 +594,7 @@ onTipoContratoChange(event: any): void {
         !this.nuevoContrato.servicio ||
         !this.nuevoContrato.creado ||
         !this.nuevoContrato.vencimiento ||
-        !this.nuevoContrato.descripcion) {
+         this.nuevoContrato.descripcion) {
 
       // Mostrar mensaje de error
       this.mostrarMensaje('danger', 'Por favor complete todos los campos obligatorios');
