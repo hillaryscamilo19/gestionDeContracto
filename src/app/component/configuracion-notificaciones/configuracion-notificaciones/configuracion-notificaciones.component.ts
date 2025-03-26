@@ -41,46 +41,11 @@ export class ConfiguracionNotificacionesComponent implements OnInit {
     }
 
     cargarConfiguracion(): void {
-      this.cargando = true
-      this.configuracionService.getConfiguracion().subscribe({
-        next: (data: any) => {
-          if (data) {
-            this.configuracion.emailRemitente = data.emailRemitente || ""
-            this.configuracion.diasAnticipacion = data.diasAnticipacion || 30
-            this.configuracion.recordatoriosAdicionales =
-              data.recordatoriosAdicionales !== undefined ? data.recordatoriosAdicionales : true
-            this.configuracion.frecuenciaRecordatorio = data.frecuenciaRecordatorio || "semanal"
-          }
-          this.cargando = false
-        },
-        error: (err: any) => {
-          this.error = "Error al cargar la configuración"
-          this.cargando = false
-          console.error(err)
-        },
-      })
+
     }
 
-    validarFormulario(): boolean {
-      this.errors = {}
-      let isValid = true
-      // Validar email remitente
-      if (!this.configuracion.emailRemitente) {
-        this.errors["emailRemitente"] = "El email remitente es requerido"
-        isValid = false
-      } else if (!this.validarEmail(this.configuracion.emailRemitente)) {
-        this.errors["emailRemitente"] = "Ingrese un email válido"
-        isValid = false
-      }
-      // Validar días de anticipación
-      if (!this.configuracion.diasAnticipacion) {
-        this.errors["diasAnticipacion"] = "Los días de anticipación son requeridos"
-        isValid = false
-      } else if (this.configuracion.diasAnticipacion < 1) {
-        this.errors["diasAnticipacion"] = "Ingrese un número válido mayor a 0"
-        isValid = false
-      }
-      return isValid
+    validarFormulario() {
+    
     }
 
     validarEmail(email: string): boolean {
@@ -94,25 +59,7 @@ export class ConfiguracionNotificacionesComponent implements OnInit {
     }
 
     guardarConfiguracion(): void {
-      if (!this.validarFormulario()) {
-        return
-      }
-
-      this.guardando = true
-      this.mensaje = ""
-      this.error = ""
-
-      this.configuracionService.actualizarConfiguracion(this.configuracion).subscribe({
-        next: () => {
-          this.mensaje = "Configuración guardada exitosamente"
-          this.guardando = false
-        },
-        error: (err: any) => {
-          this.error = "Error al guardar la configuración"
-          this.guardando = false
-          console.error(err)
-        },
-      })
+     
     }
 
     validarEmailPrueba(): boolean {
@@ -127,27 +74,6 @@ export class ConfiguracionNotificacionesComponent implements OnInit {
     }
 
     enviarCorreoPrueba(): void {
-      this.errors = {}
-
-      if (!this.validarEmailPrueba()) {
-        return
-      }
-
-      this.enviandoPrueba = true
-      this.mensaje = ""
-      this.error = ""
-
-      this.configuracionService.enviarCorreoPrueba(this.testEmailAddress).subscribe({
-        next: () => {
-          this.mensaje = "Correo de prueba enviado exitosamente"
-          this.enviandoPrueba = false
-        },
-        error: (err: any) => {
-          this.error = "Error al enviar correo de prueba"
-          this.enviandoPrueba = false
-          console.error(err)
-        },
-      })
     }
 }
 

@@ -126,32 +126,32 @@ constructor(private http: HttpClient) {}
     return this.http.delete<any>(`${this.apiUrl}/Contrato/${id}`);
   }
 
-  descargarPdf(id: string | number, nombreCliente: string): void {
-    this.obtenerPdfBlob(id).subscribe({
-      next: (blob) => {
-        // Crear URL del blob
-        const url = window.URL.createObjectURL(blob)
-        // Crear enlace de descarga
-        const link = document.createElement("a")
-        link.href = url
-        link.download = `Contrato_${nombreCliente || "Descarga"}.pdf`
-        // Simular clic
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        // Liberar URL
-        window.URL.revokeObjectURL(url)
-      },
-      error: (error) => {
-        console.error("Error al descargar PDF:", error)
-        alert("Error al descargar el PDF. Por favor intente nuevamente.")
-      },
-    })
+  descargarPdf(contratoId: string, nombreArchivo: string): void {
+    this.http.get(`${this.apiUrl}/Contrato/${contratoId}/pdf`, {
+      responseType: 'blob'
+    }).subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nombreArchivo;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    });
+  }
+
+  obtenerPdfParaVisualizar(contratoId: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/Contrato/${contratoId}/pdf`, {
+      responseType: 'blob'
+    });
   }
 
 
+  getServiciosPorPropietario(propietarioId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/Contrato/Servicios/${propietarioId}`);
+  }
 
-  
   obtenerPdfBlob(id: string | number): Observable<Blob> {
     if (!id) {
       console.error("ID no válido para obtener PDF: ", id);

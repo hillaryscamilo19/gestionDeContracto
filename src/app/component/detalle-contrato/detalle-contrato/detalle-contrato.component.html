@@ -79,9 +79,9 @@
             <td>{{ (contrato.startDate || contrato.creado) | date:'MMM d, yyyy' }}</td>
             <td>{{ (contrato.expirationDate || contrato.vencimiento) | date:'MMM d, yyyy' }}</td>
             <td>
-              <button class="btn btn-sm btn-outline-primary ms-2"
-              (click)="visualizarPdf(contrato.archivos[0].id)">
-              <i class="bi bi-eye"></i> Ver
+              <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pdfViewerModal"
+              (click)="verPdf(contrato)">
+              <i class="bi bi-eye"></i>
             </button>
             <button class="btn btn-sm btn-outline-primary ms-2" (click)="descargarPdf(contrato.archivos[0].id, contrato.clienteNombre)">
               Descargar PDF

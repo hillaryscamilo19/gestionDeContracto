@@ -25,120 +25,149 @@
       <p>&copy; {{ currentYear }} Registro De Contracto {{ 'By:Hillarys' }} </p>
     </div>
     <!-- Modal para crear contrato -->
-    <div class="modal fade" id="nuevoContratoModal" tabindex="-1" aria-labelledby="nuevoContratoModalLabel">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal fade" id="contratoFormModal" tabindex="-1" aria-labelledby="contratoFormModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="nuevoContratoModalLabel">Nuevo Contrato</h5>
+            <h5 class="modal-title" id="contratoFormModalLabel">
+              {{ modoEdicion ? 'Editar Contrato' : 'Nuevo Contrato' }}
+            </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form (ngSubmit)="crearContrato()">
+            <form [formGroup]="contratoForm">
               <!-- Información básica del contrato -->
               <div class="row mb-3">
                 <div class="col-md-6">
                   <label for="numeroContrato" class="form-label">Número de Contrato *</label>
-                  <input type="text" id="numeroContrato" name="numeroContrato" class="form-control"
-                    [(ngModel)]="nuevoContrato.numeroContrato" >
+                  <input type="text" id="numeroContrato" formControlName="numeroContrato" class="form-control"
+                    [ngClass]="{'is-invalid': submitted && f['numeroContrato'].errors}">
+                  <div *ngIf="submitted && f['numeroContrato'].errors" class="invalid-feedback">
+                    <div *ngIf="f['numeroContrato'].errors['required']">El número de contrato es requerido</div>
+                  </div>
                 </div>
                 <div class="col-md-6">
                   <label for="clienteId" class="form-label">Cliente *</label>
-                  <select id="clienteId" name="clienteId" class="form-select" [(ngModel)]="nuevoContrato.clienteId"
-                    required>
+                  <select id="clienteId" formControlName="clienteId" class="form-select"
+                    [ngClass]="{'is-invalid': submitted && f['clienteId'].errors}">
                     <option [ngValue]="null" disabled>Seleccionar cliente</option>
                     <option *ngFor="let cliente of clientes" [ngValue]="cliente.id">
                       {{ cliente.name }}
                     </option>
                   </select>
+                  <div *ngIf="submitted && f['clienteId'].errors" class="invalid-feedback">
+                    <div *ngIf="f['clienteId'].errors['required']">Debe seleccionar un cliente</div>
+                  </div>
                 </div>
               </div>
-              <!-- Tipo de contrato y propietario-->
+    
+              <!-- Tipo de contrato y propietario -->
               <div class="row mb-3">
                 <div class="col-md-4">
                   <label for="tipoContrato" class="form-label">Tipo de Contrato *</label>
-                  <select class="form-select" id="tipoContrato" name="tipoContrato"
-                    [(ngModel)]="nuevoContrato.tipoContrato" (change)="onTipoContratoChange($event)" required>
-                    <option [ngValue]="null" disabled selected>Seleccionar</option>
+                  <select id="tipoContrato" formControlName="tipoContrato" class="form-select"
+                    [ngClass]="{'is-invalid': submitted && f['tipoContrato'].errors}">
+                    <option [ngValue]="null" disabled>Seleccionar</option>
                     <option *ngFor="let tipo of tiposContrato" [ngValue]="tipo.id">{{ tipo.descripcion }}</option>
                   </select>
+                  <div *ngIf="submitted && f['tipoContrato'].errors" class="invalid-feedback">
+                    <div *ngIf="f['tipoContrato'].errors['required']">Debe seleccionar un tipo de contrato</div>
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <label for="empresaPropietario" class="form-label">Propietario del Contrato *</label>
-                  <select class="form-select" id="empresaPropietario" name="empresaPropietario"
-                    [(ngModel)]="nuevoContrato.empresaPropietario" (change)="cargarTipoServicios()" required>
-                    <option [ngValue]="null" disabled selected>Seleccionar</option>
-                    <option *ngFor="let empresa of empresaPropietario" [ngValue]="empresa.id">{{ empresa.nombreEmpresa }}
+                  <select id="empresaPropietario" formControlName="empresaPropietario" class="form-select"
+                    [ngClass]="{'is-invalid': submitted && f['empresaPropietario'].errors}" (change)="cargarServicios()">
+                    <option [ngValue]="null" disabled>Seleccionar</option>
+                    <option *ngFor="let propietario of propietarios" [ngValue]="propietario.id">
+                      {{ propietario.descripcion }}
                     </option>
                   </select>
+                  <div *ngIf="submitted && f['empresaPropietario'].errors" class="invalid-feedback">
+                    <div *ngIf="f['empresaPropietario'].errors['required']">Debe seleccionar un propietario</div>
+                  </div>
                 </div>
                 <div class="col-md-4">
-                  <label for="tiposServicios" class="form-label">Servicios</label>
-                  <select class="form-select" id="servicio" name="servicio" [(ngModel)]="nuevoContrato.servicio"
-                    required>
-                    <option [ngValue]="null" disabled selected>Seleccionar</option>
-                    <option *ngFor="let tipoServicio of servicio" [ngValue]="tipoServicio.id">{{
-                      tipoServicio.descripcion }}</option>
+                  <label for="servicio" class="form-label">Tipo de Servicio *</label>
+                  <select id="servicio" formControlName="servicio" class="form-select"
+                    [ngClass]="{'is-invalid': submitted && f['servicio'].errors}">
+                    <option [ngValue]="null" disabled>Seleccionar</option>
+                    <option *ngFor="let servicio of servicios" [ngValue]="servicio.id">
+                      {{ servicio.descripcion }}
+                    </option>
                   </select>
+                  <div *ngIf="submitted && f['servicio'].errors" class="invalid-feedback">
+                    <div *ngIf="f['servicio'].errors['required']">Debe seleccionar un tipo de servicio</div>
+                  </div>
                 </div>
               </div>
-
-
-
+    
               <!-- Fechas -->
               <div class="row mb-3">
                 <div class="col-md-6">
-                  <label for="creado" class="form-label">Fecha de Creación *</label>
-                  <input type="date" id="creado" name="creado" class="form-control" [(ngModel)]="nuevoContrato.creado"
-                    required>
+                  <label for="creado" class="form-label">Fecha de Inicio *</label>
+                  <input type="date" id="creado" formControlName="creado" class="form-control"
+                    [ngClass]="{'is-invalid': submitted && f['creado'].errors}">
+                  <div *ngIf="submitted && f['creado'].errors" class="invalid-feedback">
+                    <div *ngIf="f['creado'].errors['required']">La fecha de inicio es requerida</div>
+                  </div>
                 </div>
                 <div class="col-md-6">
                   <label for="vencimiento" class="form-label">Fecha de Vencimiento *</label>
-                  <input type="date" id="vencimiento" name="vencimiento" class="form-control"
-                    [(ngModel)]="nuevoContrato.vencimiento" required>
+                  <input type="date" id="vencimiento" formControlName="vencimiento" class="form-control"
+                    [ngClass]="{'is-invalid': submitted && f['vencimiento'].errors}">
+                  <div *ngIf="submitted && f['vencimiento'].errors" class="invalid-feedback">
+                    <div *ngIf="f['vencimiento'].errors['required']">La fecha de vencimiento es requerida</div>
+                  </div>
                 </div>
               </div>
-
+    
               <!-- Descripción -->
               <div class="mb-3">
                 <label for="descripcion" class="form-label">Descripción *</label>
-                <textarea id="descripcion" name="descripcion" class="form-control"
-                  [(ngModel)]="nuevoContrato.descripcion " rows="3" required></textarea>
+                <textarea id="descripcion" formControlName="descripcion" class="form-control" rows="3"
+                  [ngClass]="{'is-invalid': submitted && f['descripcion'].errors}"></textarea>
+                <div *ngIf="submitted && f['descripcion'].errors" class="invalid-feedback">
+                  <div *ngIf="f['descripcion'].errors['required']">La descripción es requerida</div>
+                </div>
               </div>
-
+    
               <!-- Archivo PDF -->
               <div class="mb-3">
-                <label for="pdfInput" class="form-label">Adjuntar PDF *</label>
+                <label for="archivoPdf" class="form-label">
+                  Archivo PDF del Contrato {{ modoEdicion ? '(opcional)' : '*' }}
+                </label>
                 <div class="input-group">
-                  <input type="file" class="form-control" id="pdfInput" (change)="onFileSelected($event)"
-                    accept="application/pdf">
+                  <input type="file" class="form-control" id="archivoPdf" (change)="onFileSelected($event)"
+                    accept="application/pdf" [ngClass]="{'is-invalid': submitted && !archivoSeleccionado && !modoEdicion}">
                   <button class="btn btn-outline-secondary" type="button" [disabled]="!archivoSeleccionado"
                     (click)="limpiarArchivo()">
                     <i class="bi bi-x-circle"></i>
                   </button>
                 </div>
                 <small class="form-text text-muted">Solo archivos PDF (máximo 5MB)</small>
-                <div *ngIf="errorArchivo" class="text-danger mt-1">{{ errorArchivo }}</div>
+                <div *ngIf="submitted && !archivoSeleccionado && !modoEdicion" class="text-danger small mt-1">
+                  Debe adjuntar un archivo PDF
+                </div>
+                <div *ngIf="errorArchivo" class="text-danger small mt-1">{{ errorArchivo }}</div>
               </div>
-
+    
               <!-- Vista previa del PDF -->
               <div *ngIf="pdfSrc" class="mb-3">
                 <label class="form-label">Vista previa del PDF:</label>
                 <div class="pdf-preview-container" style="height: 300px; overflow: auto; border: 1px solid #ddd;">
-                  <!-- Problema: Falta el corchete en src -->
                   <pdf-viewer src="pdfSrc" [render-text]="true" [original-size]="false" [show-all]="true"
                     [fit-to-page]="true" style="height: 100%;">
                   </pdf-viewer>
                 </div>
               </div>
-
-              <!-- Botones de acción -->
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary" [disabled]="enviando">
-                  {{ enviando ? 'Guardando...' : 'Guardar Contrato' }}
-                </button>
-              </div>
             </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" [disabled]="enviando" (click)="guardarContrato()">
+              {{ enviando ? 'Guardando...' : (modoEdicion ? 'Actualizar' : 'Guardar') }}
+            </button>
           </div>
         </div>
       </div>

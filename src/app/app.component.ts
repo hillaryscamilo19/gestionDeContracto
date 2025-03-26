@@ -22,11 +22,15 @@ export class AppComponent {
   cargando = false
   enviando = false
   filteredClients: any[] = [];
+  propietarios: any[] = [];
+  servicios: any[] = [];
   terminoBusqueda = ""
   clientes: any[] = []
   archivoSeleccionado: File | null = null
   nombreArchivo = ""
   cargandoPdf: boolean = false;
+  submitted: boolean = false;
+  modoEdicion: boolean = false;
   mostrarPdfViewer: boolean = false;
   errorArchivo = ""
   allClients: any[] = [];
@@ -43,17 +47,18 @@ export class AppComponent {
   private modalRef: any
   pdfSrc: string | ArrayBuffer | SafeResourceUrl | null = null;
   // En tu componente
-nuevoContrato: any = {
-  numeroContrato: '',
-  clienteId: null,
-  tipoContrato: null,
-  empresaPropietario: null,
-  servicio: null,
-  creado: new Date().toISOString().split('T')[0], // Fecha actual en formato YYYY-MM-DD
-  vencimiento: '', 
-  descripcion: ''
-};
+  nuevoContrato: any = {
+    numeroContrato: '',
+    clienteId: null,
+    tipoContrato: null,
+    empresaPropietario: null,
+    servicio: null,
+    creado: new Date().toISOString().split('T')[0], // Fecha actual en formato YYYY-MM-DD
+    vencimiento: '',
+    descripcion: ''
+  };
   currentYear: any;
+f: any;
 
 
   constructor(
@@ -61,10 +66,21 @@ nuevoContrato: any = {
     private contratoService: ContractoService,
     private clientService: ClienteService,
     private sanitizer: DomSanitizer
-  ) { }
+  ) {
+
+    this.contratoForm = this.fb.group({
+      numeroContrato: ['', Validators.required],
+      clienteId: [null, Validators.required],
+      tipoContrato: [null, Validators.required],
+      empresaPropietario: [null, Validators.required],
+      servicio: [null, Validators.required],
+      creado: [new Date().toISOString().split('T')[0], Validators.required],
+      vencimiento: ['', Validators.required],
+      descripcion: ['', Validators.required]
+    });
+  }
 
   ngOnInit(): void {
-    this.inicializarFormulario()
     this.cargarClientes()
     this.cargarContratos()
     this.filtrarContratos()
@@ -85,18 +101,18 @@ nuevoContrato: any = {
     }
   }
 
-  inicializarFormulario(): void {
-    this.contratoForm = this.fb.group({
-      clienteId: ["", Validators.required],
-      clienteNombre: ["", Validators.required],
-      numeroContrato: ["", Validators.required],
-      descripcion: ["", Validators.required],
-      creado: [new Date().toISOString().substring(0, 10), Validators.required],
-      vencimiento: ["", Validators.required],
-      tipoContrato: ["", Validators.required],
-      empresaPropietario: ["", Validators.required],
-      servicio: ["", Validators.required],
-    })
+  cargarServicios(): void {
+    const propietarioId = this.contratoForm.get('empresaPropietario')?.value;
+    if (propietarioId) {
+      this.contratoService.getServiciosPorPropietario(propietarioId).subscribe({
+        next: (data) => {
+          this.servicios = data;
+        },
+        error: (error) => {
+          console.error('Error al cargar servicios:', error);
+        }
+      });
+    }
   }
 
   cargarClientes(): void {
@@ -146,14 +162,13 @@ nuevoContrato: any = {
     this.limpiarArchivo()
   }
 
-  // Agrega un método para manejar el cambio en el selector
-onTipoContratoChange(event: any): void {
-  console.log('Tipo de contrato seleccionado:', event.target.value);
-  this.nuevoContrato.tipoContrato = event.target.value;
-}
+
+  onTipoContratoChange(event: any): void {
+    console.log('Tipo de contrato seleccionado:', event.target.value);
+    this.nuevoContrato.tipoContrato = event.target.value;
+  }
 
   cargarTiposContrato(): void {
-    // Si los tipos de contrato se cargan desde el servidor
     this.contratoService.getTiposContrato().subscribe({
       next: (data) => {
         this.tiposContrato = data;
@@ -164,7 +179,6 @@ onTipoContratoChange(event: any): void {
       }
     });
 
-    // O si son estáticos
     this.tiposContrato = [
       { id: 'local', descripcion: 'Local' },
       { id: 'internacional', descripcion: 'Internacional' },
@@ -201,8 +215,6 @@ onTipoContratoChange(event: any): void {
     this.contratoService.getContrato(id).subscribe({
       next: (contrato) => {
         this.contratoSeleccionado = contrato
-
-        // Actualizar el formulario con los datos del contrato
         this.contratoForm.patchValue({
           clienteNombre: contrato.clienteNombre || contrato.clienteNombre,
           clientEmail: contrato.clienteEmail || contrato.clientEmail,
@@ -214,8 +226,6 @@ onTipoContratoChange(event: any): void {
           empresaPropietario: contrato.empresaPropietario || "ssv",
           servicio: contrato.servicio || "",
         })
-
-        // Si el contrato tiene un archivo PDF, mostrar su nombre
         if (contrato.archivoPdf && contrato.archivoPdf.nombre) {
           this.nombreArchivo = contrato.archivoPdf.nombre
         } else {
@@ -252,21 +262,15 @@ onTipoContratoChange(event: any): void {
   }
 
   descargarPdf(contratoId: string): void {
-    // Primero obtener el nombre del cliente
     this.contratoService.getContrato(contratoId).subscribe({
       next: (contrato) => {
-        // Luego obtener el blob del PDF
         this.contratoService.obtenerPdfBlob(contratoId).subscribe({
           next: (blob) => {
-            // Crear URL del blob
             const url = window.URL.createObjectURL(blob);
-            // Crear enlace de descarga
             const link = document.createElement('a');
             link.href = url;
             link.download = `Contrato_${contrato.clienteNombre || 'Descarga'}.pdf`;
-            // Simular clic
             link.click();
-            // Liberar URL
             window.URL.revokeObjectURL(url);
           },
           error: (error: any) => {
@@ -327,7 +331,6 @@ onTipoContratoChange(event: any): void {
         },
       })
     } else {
-      // Create new contract - use the base URL without ID
       console.log("Creando nuevo contrato")
 
       this.contratoService.crearContrato(formData).subscribe({
@@ -363,7 +366,6 @@ onTipoContratoChange(event: any): void {
     }
   }
 
-  // Función para ver los detalles de un contrato en el modal
   verContrato(contrato: any): void {
     this.contratoSeleccionado = contrato
     console.log("Contrato seleccionado:", this.contratoSeleccionado)
@@ -372,15 +374,12 @@ onTipoContratoChange(event: any): void {
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      // Validar tipo de archivo
       if (file.type !== 'application/pdf') {
         this.errorArchivo = 'Solo se permiten archivos PDF';
         this.archivoSeleccionado = null;
         this.pdfSrc = null;
         return;
       }
-
-      // Validar tamaño (5MB máximo)
       if (file.size > 5 * 1024 * 1024) {
         this.errorArchivo = 'El archivo no debe superar los 5MB';
         this.archivoSeleccionado = null;
@@ -390,8 +389,6 @@ onTipoContratoChange(event: any): void {
 
       this.archivoSeleccionado = file;
       this.errorArchivo = '';
-
-      // Crear vista previa del PDF
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(e.target.result);
@@ -405,7 +402,6 @@ onTipoContratoChange(event: any): void {
     this.archivoSeleccionado = null
     this.nombreArchivo = ""
     this.errorArchivo = ""
-    // Limpiar el input file
     const fileInput = document.getElementById("archivoPdf") as HTMLInputElement
     if (fileInput) {
       fileInput.value = ""
@@ -416,9 +412,6 @@ onTipoContratoChange(event: any): void {
     return contrato.archivoPdf && contrato.archivoPdf.nombre
   }
 
-
-
-  // Métodos para filtrar y clasificar contratos
   filtrarContratos(): void {
     if (!this.terminoBusqueda.trim()) {
       this.contratosFiltrados = [...this.contratos]
@@ -588,13 +581,13 @@ onTipoContratoChange(event: any): void {
   crearContrato(): void {
     // Validar que todos los campos requeridos estén completos
     if (!this.nuevoContrato.numeroContrato ||
-        !this.nuevoContrato.clienteId ||
-        !this.nuevoContrato.tipoContrato ||
-        !this.nuevoContrato.empresaPropietario ||
-        !this.nuevoContrato.servicio ||
-        !this.nuevoContrato.creado ||
-        !this.nuevoContrato.vencimiento ||
-         this.nuevoContrato.descripcion) {
+      !this.nuevoContrato.clienteId ||
+      !this.nuevoContrato.tipoContrato ||
+      !this.nuevoContrato.empresaPropietario ||
+      !this.nuevoContrato.servicio ||
+      !this.nuevoContrato.creado ||
+      !this.nuevoContrato.vencimiento ||
+      this.nuevoContrato.descripcion) {
 
       // Mostrar mensaje de error
       this.mostrarMensaje('danger', 'Por favor complete todos los campos obligatorios');

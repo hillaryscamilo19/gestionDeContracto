@@ -18,6 +18,7 @@ import { ContractoService } from 'src/app/services/contracto/contracto.service';
 })
 export class DetalleContratoComponent  implements OnInit{
 @Input() cargando: boolean = false;
+@Input() titulo: string = 'Visualizador de PDF';
 contrato: any = {}
 contratos: any[] = []
 id = 0
@@ -36,7 +37,11 @@ tipoAlerta = "success"
 mensajeAlerta = ""
 diasRestantes = 0
 mostrarModal = false
+error: boolean = false;
+mensajeError: string = '';
+zoom: number = 1;
 esExitoso = false
+contratoSeleccionadoParaPdf:  any = null
 terminoBusqueda = ""
 contratoOriginal: any = {}
 contratoSeleccionado: any = null
@@ -73,8 +78,10 @@ archivoSeleccionado: File | null = null
   }
 
   ngOnInit(): void {
+
+  
+
     this.route.params.subscribe((params) => {
-      // Verificar que el ID existe y no es ':id'
       if (params["id"] && params["id"] !== ":id") {
         this.contratoId = params["id"]
         console.log("ID del contrato extraído de la ruta:", this.contratoId)
@@ -87,6 +94,55 @@ archivoSeleccionado: File | null = null
     this.cargarContratos()
     this.cargarClientes()
   }
+
+  verPdf(contrato: any): void {
+    this.contratoSeleccionadoParaPdf = contrato;
+  }
+
+  cargarPdf(): void {
+    this.cargando = true;
+    this.error = false;
+    
+    this.contratoService.obtenerPdfParaVisualizar(this.contratoId).subscribe({
+      next: (data: Blob) => {
+        this.crearUrlDesdeBlob(data);
+        this.cargando = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar el PDF:', error);
+        this.error = true;
+        this.mensajeError = 'No se pudo cargar el documento PDF. Por favor intente nuevamente.';
+        this.cargando = false;
+      }
+    });
+  }
+
+  crearUrlDesdeBlob(blob: Blob): void {
+    const fileReader = new FileReader();
+    fileReader.onload = (e: any) => {
+      this.pdfSrc = {
+        data: e.target.result
+      };
+    };
+    fileReader.readAsArrayBuffer(blob);
+  }
+  
+  zoomIn(): void {
+    if (this.zoom < 3) {
+      this.zoom += 0.25;
+    }
+  }
+  
+  zoomOut(): void {
+    if (this.zoom > 0.5) {
+      this.zoom -= 0.25;
+    }
+  }
+  
+  resetZoom(): void {
+    this.zoom = 1;
+  }
+
 
   cargarContratos(): void {
     this.contratoService.getContratos().subscribe({
