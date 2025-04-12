@@ -1,20 +1,38 @@
 <div class="main-header">
-
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Gestion de Contrato</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body conteiner w-64 bg-slate-50 border-r min-h-screen p-4">
+      <div class="conteiner">
+        <nav>
+         <div>
+          <span><a routerLink="/configuracion" routerLinkActive="active">Dashboard</a></span>
+         </div>
+         <div>
+          <span><a routerLink="/configuracion" routerLinkActive="active">Cliente</a></span>
+         </div>
+         <div>
+          <span><a routerLink="/configuracion" routerLinkActive="active">Contratos</a></span>
+         </div>
+          <div>
+            <span><a routerLink="/configuracion" routerLinkActive="active">Notificacion</a></span>
+          </div>
+          <div>
+            <span><a routerLink="/configuracion" routerLinkActive="active">Configuración</a></span>
+          </div>    
+        </nav>
+      </div>
+    </div>
+  </div>
+  
   <header class="header">
+    <a class="inicio" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample"><img src="../assets/img//justify.png" alt=""></a>
     <div class="container">
-      <h1>Gestion de Contrato</h1>
-      <nav>
-        <ul>
-          <li><a routerLink="/configuracion" routerLinkActive="active">Configuración</a></li>
-          <button class="btn btn-primary boton-Modal absolute top-0 right-0 size-16 " data-bs-toggle="modal"
-            data-bs-target="#nuevoContratoModal">
-            <i class="bi bi-plus-circle"></i>
-          </button>
-        </ul>
-      </nav>
+      <h1>Sistema De Gestion de Contrato</h1>
     </div>
   </header>
-
 
   <main class="main">
     <router-outlet></router-outlet>
@@ -22,7 +40,7 @@
 
   <footer class="footer">
     <div class="container">
-      <p>&copy; {{ currentYear }} Registro De Contracto {{ 'By:Hillarys' }} </p>
+      <p>&copy; {{ currentYear }} Registro De Contracto {{ 'By:Hillarys Camilo' }} </p>
     </div>
     <!-- Modal para crear contrato -->
     <div class="modal fade" id="contratoFormModal" tabindex="-1" aria-labelledby="contratoFormModalLabel" aria-hidden="true">
