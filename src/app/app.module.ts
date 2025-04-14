@@ -23,6 +23,7 @@ import { ClienteComponent } from './component/cliente/cliente/cliente.component'
 import { ContractFormComponent } from './component/ContractForm/contract-form/contract-form.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { PdfViewerModalComponent } from './component/ContractForm/contract-form/pdf-viewer-modal/pdf-viewer-modal/pdf-viewer-modal.component';
+import { HomeComponent } from './component/home/home/home.component';
 
 
 
@@ -37,7 +38,8 @@ import { PdfViewerModalComponent } from './component/ContractForm/contract-form/
     RegistreComponent,
     ClienteComponent,
     ContractFormComponent,
-    PdfViewerModalComponent
+    PdfViewerModalComponent,
+    HomeComponent
 
   ],
   imports: [

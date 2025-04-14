@@ -1,19 +1,12 @@
 <div class="cards-container">
   <div class="card">
-    <span class="card-title"><i class="bi bi-person-fill"></i>Total de Cliente</span>
+    <span class="card-title"><i class="bi bi-person-fill"></i>Clientes Registrados
+    </span>
     <span class="card-number"> {{ filteredClients.length }}</span>
-    <Button variant="ghost" size="sm" 
-    data-bs-toggle="modal" 
-    data-bs-target="#clientModal"  routerLink="/clientes" routerLinkActive="active">
-      Agregar Cliente
-    </Button>
   </div>
   <div class="card">
     <span class="card-title"><i class="bi bi-file-earmark-text"></i>Total de Contrato</span>
     <span class="card-number">{{ filtrarPorEstado('all').length }}</span>
-    <Button variant="ghost" size="sm" routerLink="/contrato">
-      Nuevo contrato
-    </Button>
   </div>
   <div class="card">
     <span class="card-title"><i class="bi bi-file-earmark-text"></i>Contracto</span>
