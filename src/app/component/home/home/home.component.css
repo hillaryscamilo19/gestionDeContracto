@@ -13,8 +13,8 @@ body {
 }
 
 .title{
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  font-size: 15%;
+  font-family: none;
+  font-size: 74%;
   color: #989090;
 }
 
@@ -42,7 +42,8 @@ body {
 /* Sidebar */
 .offcanvas-body {
   background-color: #f1f5f9;
-  min-height: 100vh;
+  min-height: 89vh;
+  max-width: 15%;
   padding-top: 2rem;
 }
 
