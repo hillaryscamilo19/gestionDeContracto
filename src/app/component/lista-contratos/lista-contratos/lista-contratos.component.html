@@ -1,19 +1,19 @@
 <div class="cards-container">
   <div class="card">
-    <span class="card-title">Total de Contratos</span>
-    <span class="card-number">{{ contratos.length }}</span>
+    <span class="card-title"><i class="bi bi-person-fill"></i>Clientes Registrados
+    </span>
+    <span class="card-number"> {{ filteredClients.length }}</span>
   </div>
   <div class="card">
-    <span class="card-title">Activos</span>
-    <span class="card-number">{{ filtrarPorEstado('Activo').length }}</span>
+    <span class="card-title"><i class="bi bi-file-earmark-text"></i>Total de Contrato</span>
+    <span class="card-number">{{ filtrarPorEstado('all').length }}</span>
   </div>
   <div class="card">
-    <span class="card-title">Por Vencer</span>
+    <span class="card-title"><i class="bi bi-file-earmark-text"></i>Contracto</span>
     <span class="card-number warning">{{ filtrarPorEstado('Por vencer').length }}</span>
-  </div>
-  <div class="card">
-    <span class="card-title">Vencidos</span>
-    <span class="card-number danger">{{ filtrarPorEstado('Vencido').length }}</span>
+    <Button variant="ghost" size="sm" routerLink="detalle-contrato/:id">
+      Ver Detalles
+    </Button>
   </div>
 </div>
 <app-formulario-contrato [contratos]="contratos" [cargando]="cargando"></app-formulario-contrato>

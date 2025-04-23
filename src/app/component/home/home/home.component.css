@@ -42,7 +42,8 @@ body {
 /* Sidebar */
 .offcanvas-body {
   background-color: #f1f5f9;
-  min-height: 100vh;
+  min-height: 89vh;
+  max-width: 15%;
   padding-top: 2rem;
 }
 

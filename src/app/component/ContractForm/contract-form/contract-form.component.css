@@ -1,0 +1,68 @@
+.header {
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  margin-top: 15px;
+  padding: 15px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.text{
+  color: rgb(12, 127, 180);
+  font-size: 20px;
+}
+
+.container{
+    background-color: #ffffff;
+    padding: 3%;
+    color: rgb(0, 0, 0);
+    margin-top: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.form-control{
+    width: 100%;
+}
+
+.form-select{
+  width: 94%;
+}
+
+.container-header{
+    display: flex;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* contratos.component.css */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.badge {
+  font-size: 0.85em;
+  padding: 0.35em 0.65em;
+}
+
+.btn-group .btn {
+  padding: 0.25rem 0.5rem;
+}
+
+.container-header {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+/* Estilos para dispositivos móviles */
+@media (max-width: 768px) {
+  .table th, .table td {
+    white-space: nowrap;
+  }
+  
+  .btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+  }
+}

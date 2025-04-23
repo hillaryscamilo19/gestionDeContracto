@@ -1,26 +1,553 @@
-<div class="table w-full ...">
-    <div class="table-header-group ...">
-      <div class="table-row">
-        <div class="table-cell text-left ...">Song</div>
-        <div class="table-cell text-left ...">Artist</div>
-        <div class="table-cell text-left ...">Year</div>
-      </div>
-    </div>
-    <div class="table-row-group">
-      <div class="table-row">
-        <div class="table-cell ...">The Sliding Mr. Bones (Next Stop, Pottersville)</div>
-        <div class="table-cell ...">Malcolm Lockyer</div>
-        <div class="table-cell ...">1961</div>
-      </div>
-      <div class="table-row">
-        <div class="table-cell ...">Witchy Woman</div>
-        <div class="table-cell ...">The Eagles</div>
-        <div class="table-cell ...">1972</div>
-      </div>
-      <div class="table-row">
-        <div class="table-cell ...">Shining Star</div>
-        <div class="table-cell ...">Earth, Wind, and Fire</div>
-        <div class="table-cell ...">1975</div>
-      </div>
+<div class="row mb-4">
+  <div class="col">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary me-2" routerLink="/clientes">
+      <i class="bi bi-people"></i> Gestionar Clientes
+    </button>
+  </div>
+</div>
+
+<div class="row mb-3">
+  <div class="col-md-6">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Buscar contratos..." [(ngModel)]="terminoBusqueda"
+        (keyup)="filtrarContratos()">
+      <button class="btn btn-outline-secondary" type="button" (click)="filtrarContratos()">
+        <i class="bi bi-search"></i>
+      </button>
     </div>
   </div>
+  <div class="col-md-6 text-end">
+    <button class="btn btn-outline-primary" (click)="cargarContratos()">
+      <i class="bi bi-arrow-clockwise"></i> Actualizar
+    </button>
+  </div>
+</div>
+
+<!-- Nav Tabs -->
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="activo-tab" data-bs-toggle="tab" data-bs-target="#active" type="button"
+      role="tab" aria-controls="active" aria-selected="true">Activos</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="expiring-tab" data-bs-toggle="tab" data-bs-target="#expiring" type="button" role="tab"
+      aria-controls="expiring" aria-selected="false">Por Vencer</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired" type="button" role="tab"
+      aria-controls="expired" aria-selected="false">Vencidos</button>
+  </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content mt-3" id="myTabContent">
+
+  <!-- Activos -->
+  <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="activo-tab">
+    <div *ngIf="cargando" class="text-center my-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!cargando && filtrarPorEstado('Activo').length === 0" class="alert alert-info">
+      No hay contratos activos.
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Propietario</th>
+            <th>Servicio</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Vencimiento</th>
+            <th>PDF</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contrato of filtrarPorEstado('Activo')" class="table-success">
+            <td>{{ contrato.clienteNombre }}</td>
+            <td>{{ getContractTypeName(contrato.tipoContrato) }}</td>
+            <td>{{ getOwnerName(contrato.empresaPropietario) }}</td>
+            <td>{{ contrato.serviceType }}</td>
+            <td>{{ (contrato.startDate || contrato.creado) | date:'MMM d, yyyy' }}</td>
+            <td>{{ (contrato.expirationDate || contrato.vencimiento) | date:'MMM d, yyyy' }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pdfViewerModal"
+              (click)="verPdf(contrato)">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-primary ms-2" (click)="descargarPdf(contrato.archivos[0].id, contrato.clienteNombre)">
+              Descargar PDF
+            </button>
+            </td>
+            <td>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                
+                  (click)="onFileSelected(contrato._id)">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <input type="file" id="fileInput" (change)="onFileSelected($event)" style="display: none">
+                <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Por Vencer -->
+  <div class="tab-pane fade" id="expiring" role="tabpanel" aria-labelledby="expiring-tab">
+    <div *ngIf="cargando" class="text-center my-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!cargando && filtrarPorEstado('Por vencer').length === 0" class="alert alert-info">
+      No hay contratos por vencer.
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Propietario</th>
+            <th>Servicio</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Vencimiento</th>
+            <th>PDF</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contrato of filtrarPorEstado('Por vencer')" class="table-warning">
+            <td>{{ contrato.clientName || contrato.clienteNombre }}</td>
+            <td>{{ getContractTypeName(contrato.tipoContrato) }}</td>
+            <td>{{ getOwnerName(contrato.empresaPropietario) }}</td>
+            <td>{{ contrato.servicio }}</td>
+            <td>{{ (contrato.creado || contrato.creado) | date:'MMM d, yyyy' }}</td>
+            <td>{{ (contrato.vencimiento || contrato.vencimiento) | date:'MMM d, yyyy' }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary ms-2"
+              (click)="visualizarPdf(contrato.archivos[0].id)">
+              <i class="bi bi-eye"></i> Ver
+            </button>
+            <button class="btn btn-sm btn-outline-primary ms-2" (click)="descargarPdf(contrato.archivos[0].id, contrato.clienteNombre)">
+              Descargar PDF
+            </button>
+            
+            
+            
+              <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin PDF</span>
+            </td>
+            <td>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                  (click)="verContrato(contrato)">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
+                  (click)="editarContrato(contrato._id)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Vencidos -->
+  <div class="tab-pane fade" id="expired" role="tabpanel" aria-labelledby="expired-tab">
+    <div *ngIf="cargando" class="text-center my-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!cargando && filtrarPorEstado('Vencido').length === 0" class="alert alert-info">
+      No hay contratos vencidos.
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Propietario</th>
+            <th>Servicio</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Vencimiento</th>
+            <th>PDF</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contrato of filtrarPorEstado('Vencido')" class="table-danger">
+            <td>{{ contrato.clienteNombre || contrato.clienteNombre }}</td>
+            <td>{{ getContractTypeName(contrato.tipoContrato) }}</td>
+            <td>{{ getOwnerName(contrato.empresaPropietario) }}</td>
+            <td>{{ contrato.servicio }}</td>
+            <td>{{ (contrato.creado || contrato.creado) | date:'MMM d, yyyy' }}</td>
+            <td>{{ (contrato.vencimiento || contrato.vencimiento) | date:'MMM d, yyyy' }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary ms-2"
+              (click)="visualizarPdf(contrato.archivos[0].id)">
+              <i class="bi bi-eye"></i> Ver
+            </button>
+            <button class="btn btn-sm btn-outline-primary ms-2" (click)="descargarPdf(contrato.archivos[0].id, contrato.clienteNombre)">
+              Descargar PDF
+            </button>
+            
+            
+            
+              <span *ngIf="!tienePdf(contrato)" class="text-muted">Sin PDF</span>
+            </td>
+            <td>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                  (click)="verContrato(contrato._id)">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#contratoModal"
+                  (click)="editarContrato(contrato._id)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="eliminarContrato(contrato._id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para ver detalles del contrato -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Detalles del Contrato</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="contratoSeleccionado">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <h6 class="fw-bold">Cliente</h6>
+              <p>{{ contratoSeleccionado.clienteNombre || contratoSeleccionado.clienteNombre }}</p>
+            </div>
+            <div class="col-md-6">
+              <h6 class="fw-bold">Número de Contrato</h6>
+              <p>{{ contratoSeleccionado.numeroContrato || contratoSeleccionado.numeroContrato || 'No especificado' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <h6 class="fw-bold">Tipo de Contrato</h6>
+              <p>{{ getContractTypeName(contratoSeleccionado.tipoContrato) }}</p>
+            </div>
+            <div class="col-md-4">
+              <h6 class="fw-bold">Propietario</h6>
+              <p>{{ getOwnerName(contratoSeleccionado.empresaPropietario) }}</p>
+            </div>
+            <div class="col-md-4">
+              <h6 class="fw-bold">Tipo de Servicio</h6>
+              <p>{{ contratoSeleccionado.servicio || 'No especificado' }}</p>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <h6 class="fw-bold">Correo Electrónico</h6>
+              <p>{{ contratoSeleccionado.clienteEmail || contratoSeleccionado.clientEmail }}</p>
+            </div>
+            <div class="col-md-6">
+              <h6 class="fw-bold">Fecha de Vencimiento</h6>
+              <p>{{ (contratoSeleccionado.fechaVencimiento || contratoSeleccionado.vencimiento) | date:'dd/MM/yyyy' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <h6 class="fw-bold">Fecha de Inicio</h6>
+              <p>{{ (contratoSeleccionado.creado || contratoSeleccionado.creado) | date:'dd/MM/yyyy' }}</p>
+            </div>
+            <div class="col-md-6">
+              <h6 class="fw-bold">Estado</h6>
+              <p>
+                <span class="badge" [ngClass]="{
+                    'bg-success': getEstadoTexto(contratoSeleccionado) === 'Activo',
+                    'bg-warning text-dark': getEstadoTexto(contratoSeleccionado) === 'Por vencer',
+                    'bg-danger': getEstadoTexto(contratoSeleccionado) === 'Vencido'
+                  }">
+                  {{ getEstadoTexto(contratoSeleccionado) }}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <h6 class="fw-bold">Descripción</h6>
+              <p>{{ contratoSeleccionado.descripcion || contratoSeleccionado.descripcion || 'Sin descripción' }}</p>
+            </div>
+          </div>
+
+          <!-- Mostrar información del PDF si existe -->
+          <div class="row mt-3" *ngIf="contratoSeleccionado && contratoService.tienePdf(contratoSeleccionado)">
+            <div class="col-12">
+              <h6 class="fw-bold">Archivo PDF</h6>
+              <div class="d-flex align-items-center">
+                <i class="bi bi-file-earmark-pdf text-danger me-2" style="font-size: 1.5rem;"></i>
+                <!-- Mostrar nombre del archivo según la estructura de datos -->
+                <span *ngIf="Array.isArray(contratoSeleccionado.archivos) && contratoSeleccionado.archivos.length > 0">
+                  {{ contratoSeleccionado.archivos[0].nombre }}
+                </span>
+                <span *ngIf="!Array.isArray(contratoSeleccionado.archivos) && contratoSeleccionado.archivos?.nombre">
+                  {{ contratoSeleccionado.archivos.nombre }}
+                </span>
+
+                <button class="btn btn-sm btn-outline-primary ms-2"
+                (click)="visualizarPdf(contrato.archivos[0].id)">
+                <i class="bi bi-eye"></i> Ver
+              </button>
+              <button class="btn btn-sm btn-outline-primary ms-2" (click)="descargarPdf(contrato.archivos[0].id, contrato.clienteNombre)">
+                Descargar PDF
+              </button>
+              
+              
+              
+                <button class="btn btn-sm btn-outline-primary ms-2"
+                (click)="visualizarPdf(contrato.archivos[0].id)">
+                <i class="bi bi-eye"></i> Ver
+              </button>
+              <button (click)="descargarPdf(contrato.archivos[0].id, contrato.clienteNombre)">
+                Descargar PDF
+              </button>
+              
+              
+              
+              </div>
+            </div>
+          </div>
+
+          <!-- Mostrar enlace al contrato anterior si existe -->
+          <div class="row mt-3" *ngIf="contratoSeleccionado?.previousContractPath">
+            <div class="col-12">
+              <h6 class="fw-bold">Contrato Anterior</h6>
+              <div class="d-flex align-items-center">
+                <i class="bi bi-file-earmark-pdf text-secondary me-2" style="font-size: 1.5rem;"></i>
+                <button class="btn btn-sm btn-outline-info" (click)="verContratoAnterior(contratoSeleccionado)">
+                  <i class="bi bi-eye"></i> Ver contrato anterior
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visor de PDF -->
+          <div *ngIf="mostrarPdfViewer" class="pdf-viewer-modal">
+            <div class="pdf-viewer-container">
+              <div class="pdf-viewer-header">
+                <h5>Visualizador de PDF</h5>
+                <button type="button" class="btn-close" (click)="cerrarVisualizador()"></button>
+              </div>
+              <div class="pdf-viewer-content">
+                <div *ngIf="cargandoPdf" class="text-center p-5">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                  </div>
+                  <p class="mt-2">Cargando PDF...</p>
+                </div>
+                <div *ngIf="!cargandoPdf && pdfSrc" class="pdf-container">
+                  <iframe [src]="pdfSrc" width="100%" height="100%" frameborder="0"></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button *ngIf="contratoSeleccionado" type="button" class="btn btn-primary" data-bs-dismiss="modal"
+              data-bs-toggle="modal" data-bs-target="#contratoModal" (click)="editarContrato(contratoSeleccionado._id)">
+              <i class="bi bi-pencil-square"></i> Editar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para crear/editar contrato -->
+    <div class="modal fade" id="contratoModal" tabindex="-1" aria-labelledby="contratoModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="contratoModalLabel">{{ contratoSeleccionado ? 'Editar' : 'Nuevo' }} Contrato
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="contratoForm">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="clientId" class="form-label">Cliente *</label>
+                  <select id="clientId" formControlName="clientId" class="form-select" (change)="onClientChange($event)"
+                    [ngClass]="{'is-invalid': contratoForm.get('clientId')?.invalid && contratoForm.get('clientId')?.touched}">
+                    <option value="">Seleccione un cliente</option>
+                    <option *ngFor="let client of clients" [value]="client._id">{{ client.name }}</option>
+                  </select>
+                  <div *ngIf="contratoForm.get('clientId')?.invalid && contratoForm.get('clientId')?.touched"
+                    class="invalid-feedback">
+                    Debe seleccionar un cliente
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="numeroContrato" class="form-label">Número de Contrato *</label>
+                  <input type="text" id="numeroContrato" formControlName="numeroContrato" class="form-control"
+                    [ngClass]="{'is-invalid': contratoForm.get('numeroContrato')?.invalid && contratoForm.get('numeroContrato')?.touched}">
+                  <div
+                    *ngIf="contratoForm.get('numeroContrato')?.invalid && contratoForm.get('numeroContrato')?.touched"
+                    class="invalid-feedback">
+                    El número de contrato es requerido
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label for="tipoContrato" class="form-label">Tipo de Contrato *</label>
+                  <select id="tipoContrato" formControlName="tipoContrato" class="form-select"
+                    [ngClass]="{'is-invalid': contratoForm.get('tipoContrato')?.invalid && contratoForm.get('tipoContrato')?.touched}">
+                    <option value="local">Local</option>
+                    <option value="internacional">Internacional</option>
+                    <option value="aseguradora">Aseguradora</option>
+                  </select>
+                  <div *ngIf="contratoForm.get('tipoContrato')?.invalid && contratoForm.get('tipoContrato')?.touched"
+                    class="invalid-feedback">
+                    Debe seleccionar un tipo de contrato
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <label for="empresaPropietario" class="form-label">Propietario *</label>
+                  <select id="empresaPropietario" formControlName="empresaPropietario" class="form-select"
+                    [ngClass]="{'is-invalid': contratoForm.get('empresaPropietario')?.invalid && contratoForm.get('empresaPropietario')?.touched}">
+                    <option value="ssv">SSV</option>
+                    <option value="klarida">Klarida</option>
+                    <option value="abrah">Abrah</option>
+                    <option value="softexpert">Softexpert</option>
+                  </select>
+                  <div
+                    *ngIf="contratoForm.get('empresaPropietario')?.invalid && contratoForm.get('empresaPropietario')?.touched"
+                    class="invalid-feedback">
+                    Debe seleccionar un propietario
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <label for="servicio" class="form-label">Tipo de Servicio *</label>
+                  <input type="text" id="servicio" formControlName="servicio" class="form-control"
+                    [ngClass]="{'is-invalid': contratoForm.get('servicio')?.invalid && contratoForm.get('servicio')?.touched}">
+                  <div *ngIf="contratoForm.get('servicio')?.invalid && contratoForm.get('servicio')?.touched"
+                    class="invalid-feedback">
+                    El tipo de servicio es requerido
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="creado" class="form-label">Fecha de Inicio *</label>
+                  <input type="date" id="creado" formControlName="creado" class="form-control"
+                    [ngClass]="{'is-invalid': contratoForm.get('creado')?.invalid && contratoForm.get('creado')?.touched}">
+                  <div *ngIf="contratoForm.get('creado')?.invalid && contratoForm.get('creado')?.touched"
+                    class="invalid-feedback">
+                    La fecha de inicio es requerida
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="vencimiento" class="form-label">Fecha de Vencimiento *</label>
+                  <input type="date" id="vencimiento" formControlName="vencimiento" class="form-control"
+                    [ngClass]="{'is-invalid': contratoForm.get('vencimiento')?.invalid && contratoForm.get('vencimiento')?.touched}">
+                  <div *ngIf="contratoForm.get('vencimiento')?.invalid && contratoForm.get('vencimiento')?.touched"
+                    class="invalid-feedback">
+                    La fecha de vencimiento es requerida
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="descripcion" class="form-label">Descripción *</label>
+                <textarea id="descripcion" formControlName="descripcion" class="form-control" rows="3"
+                  [ngClass]="{'is-invalid': contratoForm.get('descripcion')?.invalid && contratoForm.get('descripcion')?.touched}"></textarea>
+                <div *ngIf="contratoForm.get('descripcion')?.invalid && contratoForm.get('descripcion')?.touched"
+                  class="invalid-feedback">
+                  La descripción es requerida
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="archivoPdf" class="form-label">Archivo PDF del Contrato {{ contratoSeleccionado ?
+                  '(opcional)' :
+                  '*' }}</label>
+                <div class="file-upload">
+                  <input type="file" (change)="onFileSelected($event)" accept=".pdf" class="file-input">
+                  <div class="file-upload-info">
+                    <button type="button" class="btn btn-outline-secondary">Seleccionar archivo</button>
+                    <span class="file-name ms-2">{{ nombreArchivo || 'Ningún archivo seleccionado' }}</span>
+                  </div>
+                </div>
+                <small class="form-text text-muted">Solo archivos PDF (máximo 5MB)</small>
+                <div *ngIf="errorArchivo" class="text-danger mt-1">{{ errorArchivo }}</div>
+              </div>
+
+              <!-- Mostrar enlace al contrato anterior si existe -->
+              <div class="mb-3" *ngIf="contratoSeleccionado && contratoSeleccionado.previousContractPath">
+                <label class="form-label">Contrato Anterior</label>
+                <div>
+                  <button type="button" class="btn btn-outline-info"
+                    (click)="verContratoAnterior(contratoSeleccionado)">
+                    <i class="bi bi-file-earmark-pdf"></i> Ver contrato anterior
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" [disabled]="contratoForm.invalid || enviando"
+              (click)="guardarContrato()">
+              {{ enviando ? 'Guardando...' : (contratoSeleccionado ? 'Actualizar' : 'Guardar') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>

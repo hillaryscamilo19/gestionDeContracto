@@ -8,19 +8,33 @@ import { environment } from 'src/environments/environment';
 })
 export class ConfiguracionService {
 
-  private apiUrl = `${environment.apiUrl}`;
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
-  getConfiguracion(): Observable<RTCConfiguration> {
-    return this.http.get<RTCConfiguration>(`${this.apiUrl}/configuracion`);
+  // Enviar notificación de nuevo contrato
+  enviarNotificacionNuevoContrato(contratoId: string, destinatarios: string[]): Observable<any> {
+    return this.http.post(`${this.apiUrl}/email/nuevo-contrato`, {
+      contratoId,
+      destinatarios
+    });
   }
 
-  actualizarConfiguracion(config: RTCConfiguration): Observable<RTCConfiguration> {
-    return this.http.put<RTCConfiguration>(`${this.apiUrl}/configuracion`, config);
+  // Enviar notificación de contrato por vencer
+  enviarNotificacionVencimiento(contratoId: string, destinatarios: string[]): Observable<any> {
+    return this.http.post(`${this.apiUrl}/email/vencimiento`, {
+      contratoId,
+      destinatarios
+    });
   }
 
-  enviarCorreoPrueba(email: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/enviar-prueba`, { email });
+  // Enviar contrato por correo
+  enviarContratoPorCorreo(contratoId: string, destinatarios: string[], mensaje: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/email/enviar-contrato`, {
+      contratoId,
+      destinatarios,
+      mensaje
+    });
   }
 }
+

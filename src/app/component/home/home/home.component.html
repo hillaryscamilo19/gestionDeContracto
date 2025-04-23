@@ -1,0 +1,64 @@
+<!-- Header -->
+<header class="header">
+  <h1 class="mb-0">Bienvenido, Admin</h1>
+</header>
+
+<!-- Sidebar (offcanvas-style) -->
+<div class="d-flex">
+  <aside class="offcanvas-body p-3">
+    <nav class="d-flex flex-column gap-3">
+      <a href="#" class="active">
+        <i class="bi bi-house-door"></i> Inicio
+      </a>
+      <a href="#">
+        <i class="bi bi-file-earmark-text" routerLink="/contrato"></i> Contratos
+      </a>
+      <a href="#">
+        <i class="bi bi-person-vcard" routerLink="/clientes" ></i> Clientes
+      </a>
+      <a href="#">
+        <i class="bi bi-gear"></i>Notificacion
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main flex-grow-1 p-4">
+    <app-lista-contratos></app-lista-contratos>
+    <div class="contenedor">
+      <section class="contratos-vencer mt-5">
+        <div class="card">
+        <h3>Acciones Rápidas</h3>
+        <h2 class="title">Gestione clientes y contratos
+        </h2>
+        <div>
+          <button class="btn btn-dark w-100">
+            <i class="bi bi-person-plus"></i> Registrar cliente
+          </button>
+        </div>
+        <div>
+          <button class="btn btn-dark w-100">
+            <i class="bi bi-person-gear"></i> Registrar empleado
+          </button>
+        </div>
+        </div>
+      </section>
+
+      <section class="contratos-vencer mt-5">
+
+        <div class="card">
+          <h3>Contratos por vencer</h3>
+          <div class="item">
+            <span>Empleado: María López</span>
+            <button class="btn-ver">Ver contrato</button>
+          </div>
+          <div class="item">
+            <span>Empleado: Juan Pérez</span>
+            <button class="btn-ver">Ver contrato</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
