@@ -4,12 +4,13 @@ import { ConfiguracionNotificacionesComponent } from './component/configuracion-
 import { DetalleContratoComponent } from './component/detalle-contrato/detalle-contrato/detalle-contrato.component';
 import { FormularioContratoComponent } from './component/formulario-contrato/formulario-contrato/formulario-contrato.component';
 import { ListaContratosComponent } from './component/lista-contratos/lista-contratos/lista-contratos.component';
+import { ContractoComponent } from './component/contracto/contracto.component';
 
 
 const routes: Routes = [
   { path: '', redirectTo: '/contratos', pathMatch: 'full' },
   { path: 'contratos', component: ListaContratosComponent },
-  { path: 'contratos/nuevo', component: FormularioContratoComponent },
+  { path: 'contratos/nuevo', component: ContractoComponent},
   { path: 'contratos/editar/:id', component: FormularioContratoComponent },
   { path: 'contratos/:id', component: DetalleContratoComponent },
   { path: 'configuracion', component: ConfiguracionNotificacionesComponent },

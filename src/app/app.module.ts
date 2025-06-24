@@ -18,6 +18,7 @@ import { ConfiguracionService } from './services/configuracion/configuracion.ser
 import { LoginComponent } from './component/User/login/login/login.component';
 import { RegistreComponent } from './component/User/Registre/registre/registre.component';
 import { AuthServiceService } from './services/auth/auth-service.service';
+import { ContractoComponent } from './component/contracto/contracto.component';
 
 
 @NgModule({
@@ -29,6 +30,7 @@ import { AuthServiceService } from './services/auth/auth-service.service';
     ConfiguracionNotificacionesComponent,
     LoginComponent,
     RegistreComponent,
+    ContractoComponent,
 
   ],
   imports: [
@@ -38,11 +40,9 @@ import { AuthServiceService } from './services/auth/auth-service.service';
     HttpClientModule,
     CommonModule,
     RouterModule.forRoot([
-      { path: '', redirectTo: '/login', pathMatch: 'full' },
-      { path: 'login', component: LoginComponent },
-      { path: 'register', component: RegistreComponent },
-      { path: 'contratos', component: ListaContratosComponent },
-      { path: 'nuevo-contrato', component: FormularioContratoComponent },
+      { path: '', redirectTo: '/contratos', pathMatch: 'full' },
+      { path: 'contratos', component: ListaContratosComponent  },
+      { path: 'contratos/nuevo', component: ContractoComponent },
       { path: 'editar-contrato/:id', component: FormularioContratoComponent },
       { path: 'detalle-contrato/:id', component: DetalleContratoComponent },
       { path: 'configuracion', component: ConfiguracionNotificacionesComponent }

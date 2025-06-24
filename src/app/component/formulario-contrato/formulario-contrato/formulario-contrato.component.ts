@@ -4,7 +4,6 @@ import { ContractoService } from '../../../services/contracto/contracto.service'
 import { faFileCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import { ContractModule } from 'src/app/models/contract/contract.module';
 
-
 declare var bootstrap: any;
 
 @Component({
@@ -17,8 +16,7 @@ export class FormularioContratoComponent implements OnInit {
   @Input() cargando: boolean = false;
   @Input() contrato: ContractModule[] = [];
   contratosFiltrados: ContractModule[] = [];
-  contratoSeleccionado: ContractModule | null = null; 
-
+  contratoSeleccionado: ContractModule | null = null;
 
   faCoffee = faFileCirclePlus;
   pdfSeleccionado: File | null = null;
@@ -32,7 +30,10 @@ export class FormularioContratoComponent implements OnInit {
   private modalRef: any;
   modalInstance: any;
 
-  constructor(private fb: FormBuilder, private contratoService: ContractoService) { }
+  constructor(
+    private fb: FormBuilder,
+    private contratoService: ContractoService
+  ) {}
 
   ngOnInit(): void {
     this.cargarContratos();
@@ -44,10 +45,7 @@ export class FormularioContratoComponent implements OnInit {
     }, 1000);
   }
 
-
-  verContrato(contrato: any): void {
-
-  }
+  verContrato(contrato: any): void {}
 
   ngAfterViewInit() {
     setTimeout(() => {
@@ -58,7 +56,7 @@ export class FormularioContratoComponent implements OnInit {
             this.modalInstance = new bootstrap.Modal(modalElement, {
               backdrop: true,
               keyboard: true,
-              focus: true
+              focus: true,
             });
           });
         } catch (error) {
@@ -73,9 +71,15 @@ export class FormularioContratoComponent implements OnInit {
       clientName: ['', Validators.required],
       clienteEmail: ['', [Validators.required, Validators.email]],
       description: ['', Validators.required],
-      startDate: [new Date().toISOString().substring(0, 10), Validators.required],
-      fechaVencimiento: [new Date().toISOString().substring(0, 10), Validators.required],
-      numeroContrato: ['', Validators.toString]
+      startDate: [
+        new Date().toISOString().substring(0, 10),
+        Validators.required,
+      ],
+      fechaVencimiento: [
+        new Date().toISOString().substring(0, 10),
+        Validators.required,
+      ],
+      numeroContrato: ['', Validators.toString],
     });
   }
 
@@ -99,9 +103,13 @@ export class FormularioContratoComponent implements OnInit {
 
   getEstadoTexto(contrato: any): string {
     const hoy = new Date();
-    const fechaVencimiento = new Date(contrato.expirationDate || contrato.fechaVencimiento);
-    const diasRestantes = Math.ceil((fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-  
+    const fechaVencimiento = new Date(
+      contrato.expirationDate || contrato.fechaVencimiento
+    );
+    const diasRestantes = Math.ceil(
+      (fechaVencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
     // Lógica corregida
     if (diasRestantes <= 0) return 'Vencido';
     if (diasRestantes <= 30) return 'Por vencer';
@@ -175,9 +183,13 @@ export class FormularioContratoComponent implements OnInit {
         clientName: contrato.clientName || '',
         clientEmail: contrato.clientEmail || '',
         description: contrato.description || '',
-        startDate: contrato.startDate ? new Date(contrato.startDate).toISOString().substring(0, 10) : '',
-        expirationDate: contrato.expirationDate ? new Date(contrato.expirationDate).toISOString().substring(0, 10) : '',
-        numeroContrato: contrato.numeroContrato || ''
+        startDate: contrato.startDate
+          ? new Date(contrato.startDate).toISOString().substring(0, 10)
+          : '',
+        expirationDate: contrato.expirationDate
+          ? new Date(contrato.expirationDate).toISOString().substring(0, 10)
+          : '',
+        numeroContrato: contrato.numeroContrato || '',
       });
 
       if (this.modalInstance) {
@@ -190,17 +202,23 @@ export class FormularioContratoComponent implements OnInit {
 
   guardarContrato(): void {
     if (this.contratoForm.invalid) {
-      Object.keys(this.contratoForm.controls).forEach((key) => this.contratoForm.get(key)?.markAsTouched());
+      Object.keys(this.contratoForm.controls).forEach((key) =>
+        this.contratoForm.get(key)?.markAsTouched()
+      );
       return;
     }
 
     this.enviando = true;
     const formData = new FormData();
     formData.append('contratoData', JSON.stringify(this.contratoForm.value));
-    if (this.archivoSeleccionado) formData.append('archivoPdf', this.archivoSeleccionado);
+    if (this.archivoSeleccionado)
+      formData.append('archivoPdf', this.archivoSeleccionado);
 
     const request$ = this.contratoSeleccionado
-      ? this.contratoService.actualizarContrato(this.contratoSeleccionado._id, formData)
+      ? this.contratoService.actualizarContrato(
+          this.contratoSeleccionado._id,
+          formData
+        )
       : this.contratoService.crearContrato(formData);
 
     request$.subscribe({
@@ -224,8 +242,6 @@ export class FormularioContratoComponent implements OnInit {
       });
     }
   }
-
-
 
   limpiarArchivo(): void {
     this.archivoSeleccionado = null;
@@ -278,19 +294,30 @@ export class FormularioContratoComponent implements OnInit {
   }
 
   crearContrato() {
-    console.log('Datos a enviar:', this.nuevoContrato); 
+    console.log('Datos a enviar:', this.nuevoContrato);
     const formData = new FormData();
     const camposRequeridos = [
-      'clientName', 'clientEmail', 'description', 'startDate',
-      'expirationDate', 'numeroContrato', 'clienteNombre', 'fechaVencimiento', 'clienteEmail'
+      'clientName',
+      'clientEmail',
+      'description',
+      'startDate',
+      'expirationDate',
+      'numeroContrato',
+      'clienteNombre',
+      'fechaVencimiento',
+      'clienteEmail',
     ];
 
-    const camposFaltantes = camposRequeridos.filter(campo =>
-      !this.nuevoContrato[campo] || this.nuevoContrato[campo] === ''
+    const camposFaltantes = camposRequeridos.filter(
+      (campo) => !this.nuevoContrato[campo] || this.nuevoContrato[campo] === ''
     );
 
     if (camposFaltantes.length > 0) {
-      alert(`Por favor complete los siguientes campos: ${camposFaltantes.join(', ')}`);
+      alert(
+        `Por favor complete los siguientes campos: ${camposFaltantes.join(
+          ', '
+        )}`
+      );
       return;
     }
 
@@ -316,7 +343,7 @@ export class FormularioContratoComponent implements OnInit {
       expirationDate: this.nuevoContrato.expirationDate,
       numeroContrato: this.nuevoContrato.numeroContrato,
       clienteNombre: this.nuevoContrato.clienteNombre,
-      fechaVencimiento: this.nuevoContrato.fechaVencimiento
+      fechaVencimiento: this.nuevoContrato.fechaVencimiento,
     };
 
     this.contratoService.crearContratoJSON(this.nuevoContrato).subscribe({
@@ -337,8 +364,7 @@ export class FormularioContratoComponent implements OnInit {
         }
 
         alert(mensajeError);
-      }
-
+      },
     });
   }
 
@@ -347,10 +373,14 @@ export class FormularioContratoComponent implements OnInit {
     clientEmail: '',
     description: '',
     startDate: new Date().toISOString().split('T')[0],
-    expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0],
     numeroContrato: '',
     clienteNombre: '',
-    fechaVencimiento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    fechaVencimiento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0],
   };
 
   resetearFormulario() {
@@ -363,8 +393,6 @@ export class FormularioContratoComponent implements OnInit {
       numeroContrato: '',
       clienteNombre: '',
       fechaVencimiento: '',
-
     };
   }
 }
-
